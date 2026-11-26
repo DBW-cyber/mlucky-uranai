@@ -2,18 +2,22 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="color-scheme" content="dark">
 <title>MLucky 強運占い｜今日の12星座ランキング</title>
 <meta name="description" content="MLucky（エムラッキー）の強運占い。毎日0時に切り替わる12星座ランキング、ラッキーカラー＆アイテム、週間比較と月間TOP5も。">
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  html { color-scheme: dark; }
+  html { color-scheme: dark; overflow-x: hidden; }
   body {
     background: #0d1124;
     color: #edeade;
     font-family: "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Noto Sans JP", sans-serif;
     line-height: 1.7;
+    font-size: 17px;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    overflow-x: hidden;
     padding: 0 14px 40px;
   }
   .wrap { max-width: 680px; margin: 0 auto; }
@@ -21,13 +25,13 @@
   .brand { font-size: 15px; letter-spacing: .35em; color: #9aa3c7; }
   h1 { font-size: 34px; color: #e0bc5c; letter-spacing: .12em; margin: 2px 0 4px; }
   .tagline { font-size: 13px; color: #9aa3c7; }
-  .today { text-align: center; font-size: 19px; margin: 18px 0 4px; color: #edeade; }
-  .note { text-align: center; font-size: 12px; color: #9aa3c7; margin-bottom: 16px; }
-  h2 { font-size: 20px; color: #e0bc5c; margin: 34px 0 12px; letter-spacing: .06em; }
+  .today { text-align: center; font-size: 22px; margin: 18px 0 4px; color: #edeade; }
+  .note { text-align: center; font-size: 13px; color: #9aa3c7; margin-bottom: 16px; }
+  h2 { font-size: 22px; color: #e0bc5c; margin: 34px 0 12px; letter-spacing: .06em; }
   h2 .sub { font-size: 12px; color: #9aa3c7; letter-spacing: 0; margin-left: 8px; }
   .card {
     background: #1a1f38; border: 1px solid #2b3257; border-radius: 14px;
-    padding: 12px 14px; margin-bottom: 10px; cursor: pointer;
+    padding: 14px 16px; margin-bottom: 10px; cursor: pointer;
   }
   .card .row { display: flex; align-items: center; gap: 12px; }
   .rank {
@@ -40,24 +44,24 @@
   .rank.r2 { background: #c9cede; color: #141824; border-color: #c9cede; }
   .rank.r3 { background: #c98d5c; color: #1d1206; border-color: #c98d5c; }
   .sym { font-size: 26px; color: #e0bc5c; flex: 0 0 34px; text-align: center; }
-  .sname { font-size: 18px; font-weight: 700; }
+  .sname { font-size: 20px; font-weight: 700; }
   .speriod { font-size: 11px; color: #9aa3c7; }
   .sright { margin-left: auto; text-align: right; }
-  .stars { color: #e0bc5c; font-size: 15px; letter-spacing: 2px; white-space: nowrap; }
+  .stars { color: #e0bc5c; font-size: 17px; letter-spacing: 2px; white-space: nowrap; }
   .stars .off { color: #3a4170; }
   .slabel { font-size: 11px; color: #9aa3c7; }
-  .advice { margin-top: 8px; font-size: 14px; color: #cfd3e8; }
+  .advice { margin-top: 8px; font-size: 16px; color: #cfd3e8; }
   .detail { display: none; margin-top: 12px; border-top: 1px solid #2b3257; padding-top: 12px; }
   .card.open .detail { display: block; }
   .dgrid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 10px; }
   .dcell { background: #141830; border-radius: 10px; padding: 8px; text-align: center; }
   .dcell .k { font-size: 11px; color: #9aa3c7; }
   .dcell .v { font-size: 14px; color: #e0bc5c; letter-spacing: 1px; }
-  .lucky { font-size: 14px; margin-bottom: 4px; }
+  .lucky { font-size: 16px; margin-bottom: 4px; }
   .dot { display: inline-block; width: 12px; height: 12px; border-radius: 50%; vertical-align: -1px; margin-right: 6px; border: 1px solid rgba(255,255,255,.35); }
-  .long { font-size: 14px; color: #cfd3e8; margin-top: 8px; }
+  .long { font-size: 16px; color: #cfd3e8; margin-top: 8px; }
   .tap { font-size: 11px; color: #9aa3c7; text-align: right; margin-top: 6px; }
-  table.week { width: 100%; border-collapse: collapse; font-size: 13px; }
+  table.week { width: 100%; border-collapse: collapse; font-size: 14px; }
   table.week th, table.week td { border: 1px solid #2b3257; padding: 6px 2px; text-align: center; }
   table.week th { background: #141830; color: #9aa3c7; font-weight: 600; font-size: 12px; }
   table.week td.sn { text-align: left; padding-left: 8px; white-space: nowrap; }
@@ -67,7 +71,7 @@
   .top5 .trow { display: flex; align-items: center; gap: 12px; padding: 9px 0; border-bottom: 1px solid #2b3257; }
   .top5 .trow:last-child { border-bottom: none; }
   .top5 .avg { margin-left: auto; font-size: 12px; color: #9aa3c7; }
-  .method { background: #141830; border: 1px solid #2b3257; border-radius: 14px; padding: 16px; font-size: 14px; color: #cfd3e8; }
+  .method { background: #141830; border: 1px solid #2b3257; border-radius: 14px; padding: 16px; font-size: 16px; color: #cfd3e8; }
   .method p + p { margin-top: 8px; }
   footer { margin-top: 40px; text-align: center; font-size: 12px; color: #9aa3c7; }
   footer a { color: #9aa3c7; margin: 0 10px; }
