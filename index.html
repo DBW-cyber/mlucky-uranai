@@ -112,6 +112,7 @@
       <a href="privacy.html">プライバシーポリシー</a>
     </div>
     <div class="copy">お問い合わせ：mlucky.ai.jp@gmail.com<br>© 2026 MLucky（エムラッキー）</div>
+    <div id="diag" style="margin-top:8px;font-size:11px;color:#5b648c;"></div>
   </footer>
 </div>
 <script>
@@ -211,6 +212,7 @@ function rankingFor(ds){
 }
 function stars(n){ let s = ''; for (let i=1;i<=5;i++){ s += '<span class="' + (i<=n ? '' : 'off') + '">★</span>'; } return s; }
 
+try{ var vv = window.visualViewport; document.getElementById('diag').textContent = '表示チェック: inner=' + window.innerWidth + 'x' + window.innerHeight + ' / dpr=' + window.devicePixelRatio + ' / vv=' + (vv ? Math.round(vv.width) + ' scale=' + vv.scale.toFixed(2) : 'なし') + ' / screen=' + screen.width; }catch(e){}
 const now = new Date();
 const todayStr = dateStrOf(now);
 const WD = ['日','月','火','水','木','金','土'];
