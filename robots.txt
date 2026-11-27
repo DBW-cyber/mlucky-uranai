@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://dbw-cyber.github.io/mlucky-uranai/sitemap.xml
