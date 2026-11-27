@@ -287,7 +287,7 @@ function cardHTML(d){
         '<div class="dcell"><div class="k">健康運</div><div class="v">' + stars(d.health) + '</div></div>' +
       '</div>' +
       '<div class="lucky"><span class="dot" style="background:' + d.color[1] + '"></span>ラッキーカラー：' + d.color[0] + '</div>' +
-      '<div class="lucky"><span class="dot" style="background:#e0bc5c"></span>ラッキーアイテム：<a class="itemlink" href="https://www.google.com/search?tbm=shop&q=' + encodeURIComponent(d.item) + '" target="_blank" rel="noopener">' + d.item + ' ↗</a></div>' +
+      '<div class="lucky"><span class="dot" style="background:#e0bc5c"></span>ラッキーアイテム：<a class="itemlink" href="https://www.google.com/search?tbm=shop&q=' + encodeURIComponent(d.item + ' ' + d.color[0] + ' ' + d.number) + '" target="_blank" rel="noopener">' + d.item + ' ↗</a></div>' +
       '<div class="lucky"><span class="dot" style="background:#e0bc5c"></span>ラッキーナンバー：' + d.number + '</div>' +
       '<div class="long">' + d.text + '</div>' +
     '</div>' +
