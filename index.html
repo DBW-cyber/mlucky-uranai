@@ -74,7 +74,22 @@
   .advice { margin-top: 8px; font-size: 16px; color: #cfd3e8; }
   .detail { display: none; margin-top: 12px; border-top: 1px solid #2b3257; padding-top: 12px; }
   .card.open .detail { display: block; }
-  .dgrid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+  .dgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+  .myh { margin-top: 8px; }
+  .signpick { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 12px; }
+  .signpick button {
+    background: #141830; border: 1px solid #2b3257; color: #edeade; border-radius: 10px;
+    padding: 8px 2px; font-size: 14px; cursor: pointer; font-family: inherit;
+  }
+  .signpick button .psym { color: #e0bc5c; margin-right: 2px; }
+  .signpick button.sel { background: #e0bc5c; color: #1a1405; border-color: #e0bc5c; font-weight: 700; }
+  .signpick button.sel .psym { color: #1a1405; }
+  .myhint { font-size: 13px; color: #9aa3c7; margin-bottom: 12px; }
+  .sharebtn {
+    display: block; width: 100%; margin-top: 10px; background: #262c4e; color: #edeade;
+    border: 1px solid #3a4170; border-radius: 10px; padding: 10px; font-size: 15px;
+    cursor: pointer; font-family: inherit;
+  }
   .dcell { background: #141830; border-radius: 10px; padding: 8px; text-align: center; }
   .dcell .k { font-size: 11px; color: #9aa3c7; }
   .dcell .v { font-size: 14px; color: #e0bc5c; letter-spacing: 1px; }
@@ -109,6 +124,10 @@
 
   <div class="today" id="todayLine"></div>
   <div class="note">ランキングは毎日0時に切り替わります（同じ日は一日中同じ結果です）</div>
+
+  <h2 class="myh">今日のあなたの運勢</h2>
+  <div class="signpick" id="signPick"></div>
+  <div id="myCard"></div>
 
   <div id="ranking"></div>
 
@@ -219,7 +238,9 @@ function dayData(ds, idx){
   const item = pick(rnd, ITEMS);
   const advice = pick(rnd, ADVICE);
   const text = pick(rnd, OPEN).replace('{s}', SIGNS[idx].name) + pick(rnd, MID) + pick(rnd, CLOSE);
-  return { idx, score, love, money, work, color, item, advice, text };
+  const health = 1 + Math.floor(rnd() * 5);
+  const number = 1 + Math.floor(rnd() * 31);
+  return { idx, score, love, money, work, health, number, color, item, advice, text };
 }
 function rankingFor(ds){
   const arr = SIGNS.map((s, i) => dayData(ds, i));
@@ -243,13 +264,9 @@ const WD = ['日','月','火','水','木','金','土'];
 document.getElementById('todayLine').textContent =
   now.getFullYear() + '年' + (now.getMonth()+1) + '月' + now.getDate() + '日（' + WD[now.getDay()] + '）のランキング';
 
-const rankDiv = document.getElementById('ranking');
-rankingFor(todayStr).forEach(d => {
+function cardHTML(d){
   const s = SIGNS[d.idx];
-  const card = document.createElement('div');
-  card.className = 'card';
-  card.innerHTML =
-    '<div class="row">' +
+  return '<div class="row">' +
       '<div class="rank ' + (d.rank<=3 ? 'r'+d.rank : '') + '">' + d.rank + '</div>' +
       '<div class="sym">' + s.sym + '</div>' +
       '<div><div class="sname">' + s.name + '</div><div class="speriod">' + s.period + '</div></div>' +
@@ -261,15 +278,121 @@ rankingFor(todayStr).forEach(d => {
         '<div class="dcell"><div class="k">恋愛運</div><div class="v">' + stars(d.love) + '</div></div>' +
         '<div class="dcell"><div class="k">金運</div><div class="v">' + stars(d.money) + '</div></div>' +
         '<div class="dcell"><div class="k">仕事運</div><div class="v">' + stars(d.work) + '</div></div>' +
+        '<div class="dcell"><div class="k">健康運</div><div class="v">' + stars(d.health) + '</div></div>' +
       '</div>' +
       '<div class="lucky"><span class="dot" style="background:' + d.color[1] + '"></span>ラッキーカラー：' + d.color[0] + '</div>' +
       '<div class="lucky">ラッキーアイテム：' + d.item + '</div>' +
+      '<div class="lucky">ラッキーナンバー：' + d.number + '</div>' +
       '<div class="long">' + d.text + '</div>' +
     '</div>' +
     '<div class="tap">タップで詳しく見る</div>';
+}
+
+const rankDiv = document.getElementById('ranking');
+rankingFor(todayStr).forEach(d => {
+  const card = document.createElement('div');
+  card.className = 'card';
+  card.innerHTML = cardHTML(d);
   card.addEventListener('click', () => card.classList.toggle('open'));
   rankDiv.appendChild(card);
 });
+
+// あなたの運勢（星座はこの端末にだけ保存されます）
+const SIGN_KEY = 'mlucky_uranai_sign';
+let mySign = null;
+try { const v = localStorage.getItem(SIGN_KEY); if (v !== null && v !== '') mySign = parseInt(v, 10); } catch(e) {}
+if (mySign !== null && (isNaN(mySign) || mySign < 0 || mySign > 11)) mySign = null;
+const pickDiv = document.getElementById('signPick');
+SIGNS.forEach((s, i) => {
+  const b = document.createElement('button');
+  b.type = 'button';
+  b.innerHTML = '<span class="psym">' + s.sym + '</span>' + s.name;
+  if (i === mySign) b.className = 'sel';
+  b.addEventListener('click', () => {
+    mySign = i;
+    try { localStorage.setItem(SIGN_KEY, String(i)); } catch(e) {}
+    pickDiv.querySelectorAll('button').forEach((x, j) => x.classList.toggle('sel', j === i));
+    renderMy();
+  });
+  pickDiv.appendChild(b);
+});
+function renderMy(){
+  const box = document.getElementById('myCard');
+  box.innerHTML = '';
+  if (mySign === null) {
+    const hint = document.createElement('div');
+    hint.className = 'myhint';
+    hint.textContent = '星座を選ぶと、あなたの今日の運勢がここに表示されます（選択はこの端末にだけ保存されます）。';
+    box.appendChild(hint);
+    return;
+  }
+  const d = rankingFor(todayStr).find(x => x.idx === mySign);
+  const card = document.createElement('div');
+  card.className = 'card';
+  card.innerHTML = cardHTML(d) + '<button type="button" class="sharebtn" id="shareBtn">今日の運勢カードを画像でシェア</button>';
+  card.addEventListener('click', () => card.classList.toggle('open'));
+  box.appendChild(card);
+  document.getElementById('shareBtn').addEventListener('click', (ev) => { ev.stopPropagation(); shareCard(d); });
+}
+function wrapLines(c, text, maxW){
+  const lines = [];
+  let line = '';
+  for (const ch of text) {
+    if (c.measureText(line + ch).width > maxW && line) { lines.push(line); line = ch; }
+    else line += ch;
+  }
+  if (line) lines.push(line);
+  return lines;
+}
+function shareCard(d){
+  const s = SIGNS[d.idx];
+  const cv = document.createElement('canvas');
+  cv.width = 1080; cv.height = 1350;
+  const c = cv.getContext('2d');
+  c.fillStyle = '#0d1124'; c.fillRect(0, 0, 1080, 1350);
+  c.strokeStyle = '#e0bc5c'; c.lineWidth = 4; c.strokeRect(36, 36, 1008, 1278);
+  c.textAlign = 'center';
+  c.fillStyle = '#9aa3c7'; c.font = '34px sans-serif';
+  c.fillText('M L u c k y', 540, 128);
+  c.fillStyle = '#e0bc5c'; c.font = '700 84px sans-serif';
+  c.fillText('強運占い', 540, 238);
+  c.fillStyle = '#edeade'; c.font = '40px sans-serif';
+  c.fillText(now.getFullYear() + '年' + (now.getMonth()+1) + '月' + now.getDate() + '日（' + WD[now.getDay()] + '）', 540, 326);
+  c.font = '140px sans-serif';
+  c.fillText(s.sym, 540, 520);
+  c.font = '700 92px sans-serif';
+  c.fillText(s.name, 540, 646);
+  c.fillStyle = '#e0bc5c'; c.font = '700 62px sans-serif';
+  c.fillText('今日は 第' + d.rank + '位', 540, 752);
+  let st = '';
+  for (let i = 1; i <= 5; i++) st += (i <= d.overall ? '★' : '☆');
+  c.font = '70px sans-serif';
+  c.fillText(st, 540, 852);
+  c.fillStyle = '#cfd3e8'; c.font = '43px sans-serif';
+  wrapLines(c, d.advice, 880).slice(0, 2).forEach((ln, k) => c.fillText(ln, 540, 962 + k * 62));
+  c.fillStyle = '#edeade'; c.font = '38px sans-serif';
+  c.fillText('ラッキーカラー：' + d.color[0], 540, 1128);
+  c.fillText('ラッキーアイテム：' + d.item, 540, 1188);
+  c.fillText('ラッキーナンバー：' + d.number, 540, 1248);
+  c.fillStyle = '#9aa3c7'; c.font = '28px sans-serif';
+  c.fillText('dbw-cyber.github.io/mlucky-uranai', 540, 1300);
+  cv.toBlob((blob) => {
+    if (!blob) return;
+    const file = new File([blob], 'mlucky-uranai.png', { type: 'image/png' });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      navigator.share({ files: [file], title: 'MLucky 強運占い' }).catch(() => {});
+    } else {
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'mlucky-uranai.png';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+    }
+  }, 'image/png');
+}
+renderMy();
 
 // 週間比較（今日から7日間）
 const weekTable = document.getElementById('weekTable');
