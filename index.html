@@ -358,7 +358,9 @@ function transitScores(ds){
   const totals = new Array(12).fill(0);
   const acts = new Array(12).fill(0);
   const cats = [];
-  for (let s = 0; s < 12; s++) cats.push({love:0, money:0, work:0, health:0});
+  const nets = [];
+  for (let s = 0; s < 12; s++) { cats.push({love:0, money:0, work:0, health:0}); const n = {}; TBODIES.forEach(b => n[b.key] = 0); nets.push(n); }
+  const moonSign = Math.floor(tLon('Moon', new Date(Date.UTC(p[0], p[1] - 1, p[2], 3))) / 30);
   for (let h = 0; h < 24; h += 3) {
     const date = new Date(Date.UTC(p[0], p[1] - 1, p[2], h - 9));
     const lons = TBODIES.map(b => tLon(b.key, date));
@@ -375,6 +377,7 @@ function transitScores(ds){
           if (dev <= b.orb) {
             const v = (asp[0] === 0 ? b.conj : asp[1]) * (1 - dev / b.orb);
             totals[s] += b.w * v;
+            nets[s][b.key] += b.w * v;
             acts[s] += Math.abs(b.w * v);
             for (const k of ['love','money','work','health']) cats[s][k] += b.cat[k] * v;
             break;
@@ -383,19 +386,92 @@ function transitScores(ds){
       });
     }
   }
-  for (let s = 0; s < 12; s++) { totals[s] /= 8; acts[s] /= 8; for (const k of ['love','money','work','health']) cats[s][k] /= 8; }
-  const out = { totals, cats, acts };
+  for (let s = 0; s < 12; s++) { totals[s] /= 8; acts[s] /= 8; for (const k of ['love','money','work','health']) cats[s][k] /= 8; TBODIES.forEach(b => nets[s][b.key] /= 8); }
+  const out = { totals, cats, acts, nets, moonSign };
   T_CACHE[ds] = out;
   return out;
 }
 function starMap(v, th){ return v >= th[0] ? 5 : v >= th[1] ? 4 : v >= th[2] ? 3 : v >= th[3] ? 2 : 1; }
+
+// ===== 運勢文の生成（主流の読み方に沿ったルール方式） =====
+// その日の最も強い影響（惑星×角度の吉凶）→主題文、月のいる部屋（太陽ハウス）→今日の焦点、
+// 総合スコアの档位→締めの一文、という3層で組み立てる。文面は定型表現の組み合わせ。
+const THEME = {
+  Moon:    { good:['月の光があなたの星座をやさしく照らしています。気持ちが穏やかに整い、周りとの呼吸も合いやすい日です。','月が味方して、直感が冴える日。小さな違和感や「なんとなく良い」感覚を信じて動いてみてください。'],
+             hard:['月の巡りが気持ちを揺らしやすい日です。感情の波に流されず、決めるのは少し先に延ばすのが賢明です。','月からの緊張が強まる日。眠気やだるさを感じたら、それは体からの合図。無理をしないでください。'] },
+  Sun:     { good:['太陽があなたの星座と調和しています。自分らしく振る舞うことが、そのまま運を押し上げる日です。','太陽の追い風が吹いています。人前に出ること、意見を言うことが良い結果につながります。'],
+             hard:['太陽との角度がきつく、頑張りが空回りしやすい日。成果を焦らず、今日は土台を整える日にしてください。','太陽の緊張がプライドを刺激しやすい日です。人と張り合わず、一歩引く余裕があなたを守ります。'] },
+  Mercury: { good:['水星が順調な角度にあります。言葉が伝わりやすく、連絡や交渉、学びごとに追い風の日です。','水星の後押しで頭の回転が速くなる日。溜まっていた連絡や書類仕事を片付ける好機です。'],
+             hard:['水星との緊張で、言葉の行き違いが起きやすい日。大事な連絡は送信前にもう一度読み直してください。','水星が足を引っ張り、勘違いや忘れ物が増えそうな日。予定はメモに残すと安心です。'] },
+  Venus:   { good:['金星があなたの星座に微笑んでいます。人との縁が温かく、恋愛にも対人にも良い流れの日です。','金星の調和が魅力を引き出す日。誘いには前向きに応じてみてください。嬉しい出会いがあるかもしれません。'],
+             hard:['金星との緊張で、人間関係に小さなすれ違いが生まれやすい日。甘い言葉や衝動買いには注意してください。','金星が試練の角度にあります。相手の気持ちを決めつけず、確かめながら進めるのが無難です。'] },
+  Mars:    { good:['火星が力を貸してくれる日。行動力が高まり、迷っていたことに踏み出す勇気が湧いてきます。','火星の追い風で、やる気がみなぎる日。運動や力仕事など、体を動かすことが運を呼びます。'],
+             hard:['火星との緊張で、イライラや衝突が起きやすい日。急ぐほど遠回りになるので、深呼吸を忘れずに。','火星が強く刺激する日です。言い争いは損の元。勝ち負けにこだわらない姿勢が大切です。'] },
+  Jupiter: { good:['木星が大きな追い風を送っています。チャンスが広がりやすい日なので、誘いや新しい話には耳を傾けてください。','木星の恵みが届く日。学びや挑戦が実を結びやすく、周りからの助けも得られそうです。'],
+             hard:['木星との緊張で、期待が膨らみすぎやすい日。大きな約束や出費は、今日は見送るのが賢明です。','木星の角度が楽観を過ぎさせます。「なんとかなる」で進めず、確認を一つ挟んでください。'] },
+  Saturn:  { good:['土星が静かに支えてくれる日。コツコツ積み上げてきたことが、形になって見えてきそうです。','土星との調和で、地道な努力が評価されやすい日。約束を守る姿勢が信頼を深めます。'],
+             hard:['土星からの試練が感じられる日。責任や締め切りに追われそうですが、逃げずに向き合うことが明日の軽さにつながります。','土星の緊張で、物事が重く進みにくい日です。完璧を求めすぎず、できる範囲で確実に進めてください。'] }
+};
+const HOUSE_TXT = [
+  '月はあなたの星座そのものにあり、自分の気持ちと向き合うことが今日のテーマです。',
+  '月はお金と持ち物の部屋にあります。財布の中身や身の回りを整えると落ち着けます。',
+  '月は言葉と学びの部屋にあります。近くの人との何気ない会話にヒントがありそうです。',
+  '月は家と家族の部屋にあります。住まいを整えたり、家族と過ごしたりすることが力になります。',
+  '月は楽しみと恋の部屋にあります。好きなことに時間を使うことが、今日の充電です。',
+  '月は仕事と健康の部屋にあります。段取りを整え、体をいたわることが運を整えます。',
+  '月はパートナーの部屋にあります。一対一の関係を丁寧に扱うことが今日の鍵です。',
+  '月は深い絆と共有の部屋にあります。人に頼ること、任せることが今日は大切です。',
+  '月は学びと遠くの部屋にあります。知らない世界に触れることが視野を広げてくれます。',
+  '月は社会と仕事の部屋にあります。役割を果たす姿が、周りの信頼を集める日です。',
+  '月は仲間と未来の部屋にあります。友人とのつながりの中に嬉しい話がありそうです。',
+  '月は休息と内面の部屋にあります。一人の時間を確保することが、明日の力になります。'
+];
+const CLOSE_TXT = {
+  high:['流れはあなた向きです。今日は一歩踏み出してみてください。','追い風の日です。気になっていたことを始めるのに向いています。'],
+  mid:['穏やかな一日です。いつものペースを大切にしてください。','大きな波はない日です。身の回りの小さなことを整えると気持ちが落ち着きます。'],
+  low:['今日は守りの日です。無理をせず、早めに休んでください。','ペースを落とすことが今日の正解です。大事な決断は明日に回しましょう。']
+};
+const ADV_ASTRO = {
+  Moon:    { good:['直感を信じて大丈夫な日です。','穏やかな気持ちが運を呼びます。','小さな幸せに気づける日です。','家族や身近な人との時間が力になります。'], hard:['決断は明日に延ばして正解です。','早めの休息が一番の開運です。','気持ちの波が大きい日です。深呼吸を。','予定を詰め込みすぎないでください。'] },
+  Sun:     { good:['堂々と自分らしくいることが鍵です。','人前に出ることが追い風になります。','意見を言うことが良い結果につながります。','得意なことを見せる好機です。'], hard:['張り合わない余裕があなたを守ります。','今日は土台を整える日にしてください。','プライドは一旦脇に置いて正解です。','目立つより、支える側が吉です。'] },
+  Mercury: { good:['連絡は早めに返すと吉です。','学びごとに追い風が吹いています。','メモやリストが仕事を助けます。','交渉ごとは午前中がおすすめです。'], hard:['送信前にもう一度読み直してください。','予定はメモに残すと安心です。','大事な返信は一晩置くのも手です。','聞き間違いに注意してください。'] },
+  Venus:   { good:['誘いには前向きに応じてみてください。','人との縁が温かく育つ日です。','おしゃれが運を後押しします。','感謝を言葉にすると縁が深まります。'], hard:['衝動買いと甘い言葉に注意です。','相手の気持ちは確かめながら進めてください。','貸し借りは今日は避けてください。','嫉妬心は深呼吸で流しましょう。'] },
+  Mars:    { good:['迷ったら動くほうが正解です。','体を動かすことが運を呼びます。','朝のうちに大事な用を済ませると吉です。','スポーツで汗を流すと整います。'], hard:['深呼吸が衝突を遠ざけます。','急ぐほど遠回りになる日です。','車の運転は慎重にどうぞ。','結論を急がないことが大切です。'] },
+  Jupiter: { good:['新しい話に耳を傾けてみてください。','挑戦が実を結びやすい日です。','学びへの投資が実を結びます。','年上の人の助言に耳を傾けてください。'], hard:['大きな約束は今日は見送ってください。','「なんとかなる」の前に確認を一つ。','出費は一度立ち止まって確認を。','約束は小さめにしておくのが無難です。'] },
+  Saturn:  { good:['コツコツが形になる日です。','約束を守る姿勢が信頼を深めます。','期限を守る姿勢が評価されます。','片付けや整理が運を整えます。'], hard:['逃げずに向き合うことが近道です。','完璧より確実を選びましょう。','抱え込みすぎず、人に相談してください。','一つずつ片付けることが近道です。'] }
+};
+const ADV_QUIET = {
+  high:['静かな追い風の日です。好きなことを楽しんでください。','波風のない良い日です。笑顔で過ごしてください。','穏やかな幸運の日です。誘いに乗ってみてください。','良い流れの日です。気になることに手を伸ばしてください。','穏やかながら実りある一日です。'],
+  mid:['穏やかな一日です。いつものペースで大丈夫です。','大きな波はない日です。身の回りを整えてください。','静かな一日です。温かい飲み物でほっと一息を。','いつもの日常を丁寧に過ごしてください。','小さな片付けが気持ちを整えます。'],
+  low:['静かな一日です。無理せず体を休めてください。','今日は充電の日です。早めに休んでください。','ペースを落として正解の日です。大事な決断は明日に。','温かくして過ごすことが今日の養生です。','大事な連絡以外は明日に回して大丈夫です。']
+};
+const HOUSE_ADV = [
+  '自分の気持ちを大切にしてください。','財布の中身を整えると落ち着きます。','何気ない会話にヒントがあります。','家族との時間が力になります。',
+  '好きなことを楽しんでください。','体をいたわることが今日の鍵です。','一対一の関係を丁寧に扱ってください。','人に頼ることも大切です。',
+  '知らない世界に触れてみてください。','役割を果たす姿が信頼を集めます。','友人とのつながりが力になります。','一人の時間で充電してください。'
+];
+function astroCompose(ds, d, sc){
+  const net = sc.nets[d.idx];
+  let dom = null, domAbs = 0.02;
+  TBODIES.forEach(b => { const a = Math.abs(net[b.key]); if (a > domAbs) { domAbs = a; dom = b.key; } });
+  const tier = d.tscore >= TH_TOTAL[1] ? 'high' : (d.tscore >= TH_TOTAL[2] ? 'mid' : 'low');
+  const rnd = mulberry32(hashStr(ds + '|txt|' + d.idx));
+  const pick = arr => arr[Math.floor(rnd() * arr.length)];
+  const house = ((sc.moonSign - d.idx) % 12 + 12) % 12;
+  let text, advPool = null;
+  if (dom) {
+    const tone = net[dom] >= 0 ? 'good' : 'hard';
+    text = pick(THEME[dom][tone]) + HOUSE_TXT[house] + pick(CLOSE_TXT[tier]);
+    advPool = ADV_ASTRO[dom][tone];
+  } else {
+    text = '今日は大きな星の角度が少ない、静かな一日です。' + HOUSE_TXT[house] + pick(CLOSE_TXT[tier]);
+  }
+  return { text, advPool, tier, house };
+}
+
 function rankingForTransit(ds){
   const sc = transitScores(ds);
   const arr = SIGNS.map((s, idx) => dayData(ds, idx));
-  const dayRnd = mulberry32(hashStr(ds + '|advice'));
-  const pool = ADVICE.slice();
-  for (let i = pool.length - 1; i > 0; i--){ const j = Math.floor(dayRnd() * (i + 1)); const t = pool[i]; pool[i] = pool[j]; pool[j] = t; }
-  arr.forEach((d, i) => { d.advice = pool[i % pool.length]; });
   arr.forEach(d => {
     d.tscore = sc.totals[d.idx];
     d.overall = starMap(d.tscore, TH_TOTAL);
@@ -404,8 +480,20 @@ function rankingForTransit(ds){
       d[k] = Math.max(d.overall - 1, Math.min(d.overall + 1, v));
     }
   });
+  arr.forEach(d => { const c = astroCompose(ds, d, sc); d.text = c.text; d.advPool = c.advPool; d.tier = c.tier; d.houseIdx = c.house; });
   arr.sort((a, b) => (b.tscore - a.tscore) || (sc.acts[b.idx] - sc.acts[a.idx]) || (hashStr(ds + '|tie|' + a.idx) - hashStr(ds + '|tie|' + b.idx)));
   arr.forEach((d, k) => { d.rank = k + 1; });
+  const usedAdv = new Set();
+  arr.forEach(d => {
+    const pool = d.advPool || ADV_QUIET[d.tier].concat([HOUSE_ADV[d.houseIdx]]);
+    const rnd = mulberry32(hashStr(ds + '|adv|' + d.idx));
+    const start = Math.floor(rnd() * pool.length);
+    let chosen = pool[start];
+    for (let k = 0; k < pool.length; k++) { const cand = pool[(start + k) % pool.length]; if (!usedAdv.has(cand)) { chosen = cand; break; } }
+    d.advice = chosen;
+    usedAdv.add(chosen);
+    delete d.advPool; delete d.tier; delete d.houseIdx;
+  });
   return arr;
 }
 function rankingFor(ds){
