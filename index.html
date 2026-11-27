@@ -97,7 +97,9 @@
   .lucky a { color: inherit; text-decoration: underline; text-decoration-color: rgba(237,234,222,.35); text-underline-offset: 3px; }
   .dot { display: inline-block; width: 12px; height: 12px; border-radius: 50%; vertical-align: -1px; margin-right: 6px; border: 1px solid rgba(255,255,255,.35); }
   .long { font-size: 16px; color: #cfd3e8; margin-top: 8px; }
-  .tap { font-size: 11px; color: #9aa3c7; text-align: right; margin-top: 6px; }
+  .chev { text-align: center; margin-top: 4px; line-height: 0; }
+  .chev svg { width: 24px; height: 20px; fill: none; stroke: #9aa3c7; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; transition: transform .3s ease; }
+  .card.open .chev svg { transform: rotate(180deg); }
   table.week { width: 100%; border-collapse: collapse; font-size: 14px; }
   table.week th, table.week td { border: 1px solid #2b3257; padding: 6px 2px; text-align: center; }
   table.week th { background: #141830; color: #9aa3c7; font-weight: 600; font-size: 12px; }
@@ -440,7 +442,7 @@ function cardHTML(d){
       '<div class="lucky"><span class="dot" style="background:#e0bc5c"></span>ラッキーナンバー：' + d.number + '</div>' +
       '<div class="long">' + d.text + '</div>' +
     '</div>' +
-    '<div class="tap">タップで詳しく見る</div>';
+    '<div class="chev"><svg viewBox="0 0 24 20" aria-hidden="true"><polyline points="4,3 12,10 20,3"/><polyline points="4,11 12,18 20,11"/></svg></div>';
 }
 
 const rankDiv = document.getElementById('ranking');
