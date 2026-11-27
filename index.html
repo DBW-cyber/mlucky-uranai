@@ -354,6 +354,17 @@ function diamond(c, x, y, r){
   c.moveTo(x, y - r); c.lineTo(x + r, y); c.lineTo(x, y + r); c.lineTo(x - r, y);
   c.closePath(); c.fill();
 }
+function balancedLines(c, text, maxW, maxLines){
+  let lines = wrapLines(c, text, maxW).slice(0, maxLines);
+  if (lines.length >= 2 && lines[lines.length - 1].length <= 4) {
+    const n = lines.length;
+    const per = Math.ceil(text.length / n);
+    const out = [];
+    for (let i = 0; i < n; i++) out.push(text.slice(i * per, (i + 1) * per));
+    if (out.every(ln => c.measureText(ln).width <= maxW)) lines = out;
+  }
+  return lines;
+}
 function shareCard(d){
   const s = SIGNS[d.idx];
   const cv = document.createElement('canvas');
@@ -366,58 +377,53 @@ function shareCard(d){
   c.fillStyle = '#e0bc5c';
   [[50, 50], [1030, 50], [50, 1630], [1030, 1630]].forEach(p => diamond(c, p[0], p[1], 15));
   c.font = '30px sans-serif'; c.textAlign = 'center';
-  c.fillText('✦', 150, 130); c.fillText('✦', 930, 130);
-  c.fillText('✦', 150, 1580); c.fillText('✦', 930, 1580);
-  c.fillStyle = '#9aa3c7'; c.font = '30px sans-serif';
-  c.fillText('M L u c k y', 540, 118);
+  c.fillText('✦', 150, 104); c.fillText('✦', 930, 104);
   c.fillStyle = '#e0bc5c'; c.font = '700 66px sans-serif';
-  c.fillText('強運占い', 540, 192);
+  c.fillText('強運占い', 540, 168);
   c.fillStyle = '#edeade'; c.font = '36px sans-serif';
-  c.fillText((now.getMonth()+1) + '月' + now.getDate() + '日（' + WD[now.getDay()] + '）', 540, 254);
+  c.fillText((now.getMonth()+1) + '月' + now.getDate() + '日（' + WD[now.getDay()] + '）', 540, 230);
   c.font = '128px sans-serif';
-  c.fillText(s.sym, 540, 420);
+  c.fillText(s.sym, 540, 396);
   c.font = '700 84px sans-serif';
-  c.fillText(s.name, 540, 528);
+  c.fillText(s.name, 540, 504);
   c.fillStyle = '#9aa3c7'; c.font = '30px sans-serif';
-  c.fillText(s.period, 540, 576);
+  c.fillText(s.period, 540, 552);
   c.fillStyle = '#e0bc5c'; c.font = '700 58px sans-serif';
-  c.fillText('第' + d.rank + '位', 540, 664);
+  c.fillText('第' + d.rank + '位', 540, 640);
   c.font = '62px sans-serif';
-  c.fillText(starStr(d.overall), 540, 736);
+  c.fillText(starStr(d.overall), 540, 712);
   c.fillStyle = '#cfd3e8'; c.font = '42px sans-serif';
-  wrapLines(c, d.advice, 880).slice(0, 2).forEach((ln, k) => c.fillText(ln, 540, 826 + k * 60));
+  balancedLines(c, d.advice, 880, 2).forEach((ln, k) => c.fillText(ln, 540, 802 + k * 60));
   c.strokeStyle = '#3a4170'; c.lineWidth = 2;
-  c.beginPath(); c.moveTo(190, 936); c.lineTo(890, 936); c.stroke();
+  c.beginPath(); c.moveTo(190, 912); c.lineTo(890, 912); c.stroke();
   // 分野別（画面のカードと同じ内容）
   const cats = [['恋愛運', d.love], ['金運', d.money], ['仕事運', d.work], ['健康運', d.health]];
   cats.forEach((ct, i) => {
     const x = (i % 2 === 0) ? 300 : 780;
-    const y = 1006 + Math.floor(i / 2) * 108;
+    const y = 982 + Math.floor(i / 2) * 108;
     c.fillStyle = '#9aa3c7'; c.font = '31px sans-serif';
     c.fillText(ct[0], x, y);
     c.fillStyle = '#e0bc5c'; c.font = '42px sans-serif';
     c.fillText(starStr(ct[1]), x, y + 52);
   });
   c.strokeStyle = '#3a4170';
-  c.beginPath(); c.moveTo(190, 1170); c.lineTo(890, 1170); c.stroke();
-  // ラッキー3項目（画面と同じく丸ドット付き）
+  c.beginPath(); c.moveTo(190, 1146); c.lineTo(890, 1146); c.stroke();
+  // ラッキー3項目（左端をそろえて表示）
   const luckies = [['ラッキーカラー：' + d.color[0], d.color[1]], ['ラッキーアイテム：' + d.item, '#e0bc5c'], ['ラッキーナンバー：' + d.number, '#e0bc5c']];
   c.font = '37px sans-serif';
+  const maxTextW = Math.max.apply(null, luckies.map(lk => c.measureText(lk[0]).width));
+  const textX = 540 - maxTextW / 2;
   luckies.forEach((lk, i) => {
-    const y = 1236 + i * 60;
-    const w = c.measureText(lk[0]).width;
-    const x0 = 540 - w / 2;
+    const y = 1212 + i * 60;
     c.fillStyle = lk[1];
-    c.beginPath(); c.arc(x0 - 26, y - 12, 11, 0, Math.PI * 2); c.fill();
+    c.beginPath(); c.arc(textX - 26, y - 12, 11, 0, Math.PI * 2); c.fill();
     c.strokeStyle = 'rgba(255,255,255,.35)'; c.lineWidth = 1; c.stroke();
     c.fillStyle = '#edeade'; c.textAlign = 'left';
-    c.fillText(lk[0], x0, y);
+    c.fillText(lk[0], textX, y);
     c.textAlign = 'center';
   });
   c.fillStyle = '#cfd3e8'; c.font = '34px sans-serif';
-  wrapLines(c, d.text, 860).slice(0, 4).forEach((ln, k) => c.fillText(ln, 540, 1450 + k * 50));
-  c.fillStyle = '#9aa3c7'; c.font = '26px sans-serif';
-  c.fillText('dbw-cyber.github.io/mlucky-uranai', 540, 1604);
+  balancedLines(c, d.text, 860, 4).forEach((ln, k) => c.fillText(ln, 540, 1420 + k * 50));
   cv.toBlob((blob) => {
     if (!blob) return;
     const file = new File([blob], 'mlucky-uranai.png', { type: 'image/png' });
