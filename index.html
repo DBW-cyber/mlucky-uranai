@@ -317,13 +317,7 @@ SIGNS.forEach((s, i) => {
 function renderMy(){
   const box = document.getElementById('myCard');
   box.innerHTML = '';
-  if (mySign === null) {
-    const hint = document.createElement('div');
-    hint.className = 'myhint';
-    hint.textContent = '星座を選ぶと、あなたの今日の運勢がここに表示されます（選択はこの端末にだけ保存されます）。';
-    box.appendChild(hint);
-    return;
-  }
+  if (mySign === null) return;
   const d = rankingFor(todayStr).find(x => x.idx === mySign);
   const card = document.createElement('div');
   card.className = 'card';
