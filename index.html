@@ -94,6 +94,7 @@
   .dcell .k { font-size: 11px; color: #9aa3c7; }
   .dcell .v { font-size: 14px; color: #e0bc5c; letter-spacing: 1px; }
   .lucky { font-size: 16px; margin-bottom: 4px; }
+  .lucky a { color: inherit; text-decoration: underline; text-decoration-color: rgba(237,234,222,.35); text-underline-offset: 3px; }
   .dot { display: inline-block; width: 12px; height: 12px; border-radius: 50%; vertical-align: -1px; margin-right: 6px; border: 1px solid rgba(255,255,255,.35); }
   .long { font-size: 16px; color: #cfd3e8; margin-top: 8px; }
   .tap { font-size: 11px; color: #9aa3c7; text-align: right; margin-top: 6px; }
@@ -286,7 +287,7 @@ function cardHTML(d){
         '<div class="dcell"><div class="k">健康運</div><div class="v">' + stars(d.health) + '</div></div>' +
       '</div>' +
       '<div class="lucky"><span class="dot" style="background:' + d.color[1] + '"></span>ラッキーカラー：' + d.color[0] + '</div>' +
-      '<div class="lucky"><span class="dot" style="background:#e0bc5c"></span>ラッキーアイテム：' + d.item + '</div>' +
+      '<div class="lucky"><span class="dot" style="background:#e0bc5c"></span>ラッキーアイテム：<a class="itemlink" href="https://www.google.com/search?tbm=shop&q=' + encodeURIComponent(d.item) + '" target="_blank" rel="noopener">' + d.item + ' ↗</a></div>' +
       '<div class="lucky"><span class="dot" style="background:#e0bc5c"></span>ラッキーナンバー：' + d.number + '</div>' +
       '<div class="long">' + d.text + '</div>' +
     '</div>' +
@@ -343,38 +344,80 @@ function wrapLines(c, text, maxW){
   if (line) lines.push(line);
   return lines;
 }
+function starStr(n){
+  let st = '';
+  for (let i = 1; i <= 5; i++) st += (i <= n ? '★' : '☆');
+  return st;
+}
+function diamond(c, x, y, r){
+  c.beginPath();
+  c.moveTo(x, y - r); c.lineTo(x + r, y); c.lineTo(x, y + r); c.lineTo(x - r, y);
+  c.closePath(); c.fill();
+}
 function shareCard(d){
   const s = SIGNS[d.idx];
   const cv = document.createElement('canvas');
-  cv.width = 1080; cv.height = 1350;
+  cv.width = 1080; cv.height = 1680;
   const c = cv.getContext('2d');
-  c.fillStyle = '#0d1124'; c.fillRect(0, 0, 1080, 1350);
-  c.strokeStyle = '#e0bc5c'; c.lineWidth = 4; c.strokeRect(36, 36, 1008, 1278);
-  c.textAlign = 'center';
-  c.fillStyle = '#9aa3c7'; c.font = '34px sans-serif';
-  c.fillText('M L u c k y', 540, 128);
-  c.fillStyle = '#e0bc5c'; c.font = '700 84px sans-serif';
-  c.fillText('強運占い', 540, 238);
-  c.fillStyle = '#edeade'; c.font = '40px sans-serif';
-  c.fillText(now.getFullYear() + '年' + (now.getMonth()+1) + '月' + now.getDate() + '日（' + WD[now.getDay()] + '）', 540, 326);
-  c.font = '140px sans-serif';
-  c.fillText(s.sym, 540, 520);
-  c.font = '700 92px sans-serif';
-  c.fillText(s.name, 540, 646);
-  c.fillStyle = '#e0bc5c'; c.font = '700 62px sans-serif';
-  c.fillText('今日は 第' + d.rank + '位', 540, 752);
-  let st = '';
-  for (let i = 1; i <= 5; i++) st += (i <= d.overall ? '★' : '☆');
-  c.font = '70px sans-serif';
-  c.fillText(st, 540, 852);
-  c.fillStyle = '#cfd3e8'; c.font = '43px sans-serif';
-  wrapLines(c, d.advice, 880).slice(0, 2).forEach((ln, k) => c.fillText(ln, 540, 962 + k * 62));
-  c.fillStyle = '#edeade'; c.font = '38px sans-serif';
-  c.fillText('ラッキーカラー：' + d.color[0], 540, 1128);
-  c.fillText('ラッキーアイテム：' + d.item, 540, 1188);
-  c.fillText('ラッキーナンバー：' + d.number, 540, 1248);
-  c.fillStyle = '#9aa3c7'; c.font = '28px sans-serif';
-  c.fillText('dbw-cyber.github.io/mlucky-uranai', 540, 1300);
+  c.fillStyle = '#0d1124'; c.fillRect(0, 0, 1080, 1680);
+  // タロットカード風フレーム（二重枠＋四隅のダイヤ＋小さな星）
+  c.strokeStyle = '#e0bc5c'; c.lineWidth = 6; c.strokeRect(24, 24, 1032, 1632);
+  c.lineWidth = 2; c.strokeRect(50, 50, 980, 1580);
+  c.fillStyle = '#e0bc5c';
+  [[50, 50], [1030, 50], [50, 1630], [1030, 1630]].forEach(p => diamond(c, p[0], p[1], 15));
+  c.font = '30px sans-serif'; c.textAlign = 'center';
+  c.fillText('✦', 150, 130); c.fillText('✦', 930, 130);
+  c.fillText('✦', 150, 1580); c.fillText('✦', 930, 1580);
+  c.fillStyle = '#9aa3c7'; c.font = '30px sans-serif';
+  c.fillText('M L u c k y', 540, 118);
+  c.fillStyle = '#e0bc5c'; c.font = '700 66px sans-serif';
+  c.fillText('強運占い', 540, 192);
+  c.fillStyle = '#edeade'; c.font = '36px sans-serif';
+  c.fillText((now.getMonth()+1) + '月' + now.getDate() + '日（' + WD[now.getDay()] + '）', 540, 254);
+  c.font = '128px sans-serif';
+  c.fillText(s.sym, 540, 420);
+  c.font = '700 84px sans-serif';
+  c.fillText(s.name, 540, 528);
+  c.fillStyle = '#9aa3c7'; c.font = '30px sans-serif';
+  c.fillText(s.period, 540, 576);
+  c.fillStyle = '#e0bc5c'; c.font = '700 58px sans-serif';
+  c.fillText('第' + d.rank + '位', 540, 664);
+  c.font = '62px sans-serif';
+  c.fillText(starStr(d.overall), 540, 736);
+  c.fillStyle = '#cfd3e8'; c.font = '42px sans-serif';
+  wrapLines(c, d.advice, 880).slice(0, 2).forEach((ln, k) => c.fillText(ln, 540, 826 + k * 60));
+  c.strokeStyle = '#3a4170'; c.lineWidth = 2;
+  c.beginPath(); c.moveTo(190, 936); c.lineTo(890, 936); c.stroke();
+  // 分野別（画面のカードと同じ内容）
+  const cats = [['恋愛運', d.love], ['金運', d.money], ['仕事運', d.work], ['健康運', d.health]];
+  cats.forEach((ct, i) => {
+    const x = (i % 2 === 0) ? 300 : 780;
+    const y = 1006 + Math.floor(i / 2) * 108;
+    c.fillStyle = '#9aa3c7'; c.font = '31px sans-serif';
+    c.fillText(ct[0], x, y);
+    c.fillStyle = '#e0bc5c'; c.font = '42px sans-serif';
+    c.fillText(starStr(ct[1]), x, y + 52);
+  });
+  c.strokeStyle = '#3a4170';
+  c.beginPath(); c.moveTo(190, 1170); c.lineTo(890, 1170); c.stroke();
+  // ラッキー3項目（画面と同じく丸ドット付き）
+  const luckies = [['ラッキーカラー：' + d.color[0], d.color[1]], ['ラッキーアイテム：' + d.item, '#e0bc5c'], ['ラッキーナンバー：' + d.number, '#e0bc5c']];
+  c.font = '37px sans-serif';
+  luckies.forEach((lk, i) => {
+    const y = 1236 + i * 60;
+    const w = c.measureText(lk[0]).width;
+    const x0 = 540 - w / 2;
+    c.fillStyle = lk[1];
+    c.beginPath(); c.arc(x0 - 26, y - 12, 11, 0, Math.PI * 2); c.fill();
+    c.strokeStyle = 'rgba(255,255,255,.35)'; c.lineWidth = 1; c.stroke();
+    c.fillStyle = '#edeade'; c.textAlign = 'left';
+    c.fillText(lk[0], x0, y);
+    c.textAlign = 'center';
+  });
+  c.fillStyle = '#cfd3e8'; c.font = '34px sans-serif';
+  wrapLines(c, d.text, 860).slice(0, 4).forEach((ln, k) => c.fillText(ln, 540, 1450 + k * 50));
+  c.fillStyle = '#9aa3c7'; c.font = '26px sans-serif';
+  c.fillText('dbw-cyber.github.io/mlucky-uranai', 540, 1604);
   cv.toBlob((blob) => {
     if (!blob) return;
     const file = new File([blob], 'mlucky-uranai.png', { type: 'image/png' });
@@ -392,6 +435,8 @@ function shareCard(d){
   }, 'image/png');
 }
 renderMy();
+// アイテムのショッピングリンクをタップしてもカードが開閉しないようにする
+document.addEventListener('click', (e) => { if (e.target.closest('.itemlink')) e.stopPropagation(); }, true);
 
 // 週間比較（今日から7日間）
 const weekTable = document.getElementById('weekTable');
