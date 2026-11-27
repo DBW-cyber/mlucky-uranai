@@ -450,6 +450,32 @@ const HOUSE_ADV = [
   '好きなことを楽しんでください。','体をいたわることが今日の鍵です。','一対一の関係を丁寧に扱ってください。','人に頼ることも大切です。',
   '知らない世界に触れてみてください。','役割を果たす姿が信頼を集めます。','友人とのつながりが力になります。','一人の時間で充電してください。'
 ];
+
+// ===== ラッキー3項目の由来（惑星の伝統的対応） =====
+// その日に最も強く影響する惑星から、色・アイテム・数を決める（古典占星術・数秘の対応）。
+// 影響する惑星が無い静かな日は、月がいる星座の支配星（古典ルーラー）に従う。
+const RULERS = ['Mars','Venus','Mercury','Moon','Sun','Mercury','Venus','Mars','Jupiter','Saturn','Saturn','Jupiter'];
+const PLANET_LUCKY = {
+  Moon:    { number: 2, colors: [['シルバー','#c9ccd6'], ['ホワイト','#f2f2f2']], items: ['観葉植物','ハーブティー','銀のアクセサリー','クッション'] },
+  Sun:     { number: 1, colors: [['ゴールド','#d4af37'], ['オレンジ','#e08a3c']], items: ['金のアクセサリー','サングラス','ひまわりの花','目覚まし時計'] },
+  Mercury: { number: 5, colors: [['イエロー','#e3c94f'], ['ミントグリーン','#8fd0b2']], items: ['手帳','万年筆','文庫本','スマホケース'] },
+  Venus:   { number: 6, colors: [['ピンク','#e8a7bf'], ['グリーン','#7fb069']], items: ['香水','花束','スカーフ','チョコレート'] },
+  Mars:    { number: 9, colors: [['レッド','#c0392b'], ['ボルドー','#7b2d43']], items: ['スポーツタオル','スニーカー','赤いポーチ','エクササイズバンド'] },
+  Jupiter: { number: 3, colors: [['パープル','#7d5ba6'], ['ネイビー','#33507a']], items: ['長財布','ハードカバーの本','旅行ポーチ','紅茶の缶'] },
+  Saturn:  { number: 8, colors: [['ブラック','#2b2b30'], ['ブラウン','#8a5a33']], items: ['腕時計','革のキーケース','眼鏡','クラシックな傘'] }
+};
+function astroLucky(ds, d, sc){
+  const net = sc.nets[d.idx];
+  let dom = null, domAbs = 0.02;
+  TBODIES.forEach(b => { const a = Math.abs(net[b.key]); if (a > domAbs) { domAbs = a; dom = b.key; } });
+  const srcPlanet = dom || RULERS[sc.moonSign];
+  const L = PLANET_LUCKY[srcPlanet];
+  const rnd = mulberry32(hashStr(ds + '|lucky|' + d.idx));
+  d.color = L.colors[Math.floor(rnd() * L.colors.length)];
+  d.item = L.items[Math.floor(rnd() * L.items.length)];
+  d.number = L.number;
+}
+
 function astroCompose(ds, d, sc){
   const net = sc.nets[d.idx];
   let dom = null, domAbs = 0.02;
@@ -480,7 +506,7 @@ function rankingForTransit(ds){
       d[k] = Math.max(d.overall - 1, Math.min(d.overall + 1, v));
     }
   });
-  arr.forEach(d => { const c = astroCompose(ds, d, sc); d.text = c.text; d.advPool = c.advPool; d.tier = c.tier; d.houseIdx = c.house; });
+  arr.forEach(d => { const c = astroCompose(ds, d, sc); d.text = c.text; d.advPool = c.advPool; d.tier = c.tier; d.houseIdx = c.house; astroLucky(ds, d, sc); });
   arr.sort((a, b) => (b.tscore - a.tscore) || (sc.acts[b.idx] - sc.acts[a.idx]) || (hashStr(ds + '|tie|' + a.idx) - hashStr(ds + '|tie|' + b.idx)));
   arr.forEach((d, k) => { d.rank = k + 1; });
   const usedAdv = new Set();
