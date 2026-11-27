@@ -45,7 +45,6 @@
   header { text-align: center; padding: 22px 0 0; position: relative; }
   .brand { position: absolute; top: 8px; right: 10px; color: #f6f2e9; font-weight: 300; letter-spacing: .34em; font-size: 8.5px; font-family: Georgia, 'Playfair Display', 'Times New Roman', serif; font-style: italic; }
   h1 { font-size: 34px; color: #e0bc5c; letter-spacing: .12em; margin: 2px 0 4px; }
-  .today { text-align: center; font-size: 22px; margin: 6px 0 4px; color: #edeade; }
   .note { text-align: center; font-size: 13px; color: #9aa3c7; margin-bottom: 16px; }
   h2 { font-size: 22px; color: #e0bc5c; margin: 34px 0 12px; letter-spacing: .06em; }
   h2 .sub { font-size: 12px; color: #9aa3c7; letter-spacing: 0; margin-left: 8px; }
@@ -120,9 +119,7 @@
     <h1>強運占い</h1>
   </header>
 
-  <div class="today" id="todayLine"></div>
-
-  <h2 class="myh">今日のあなたの運勢</h2>
+  <h2 class="myh">今日のあなたの運勢<span class="sub" id="todayLine"></span></h2>
   <div class="signpick" id="signPick"></div>
   <div id="myCard"></div>
 
@@ -260,7 +257,7 @@ const now = new Date();
 const todayStr = dateStrOf(now);
 const WD = ['日','月','火','水','木','金','土'];
 document.getElementById('todayLine').textContent =
-  now.getFullYear() + '年' + (now.getMonth()+1) + '月' + now.getDate() + '日（' + WD[now.getDay()] + '）';
+  (now.getMonth()+1) + '月' + now.getDate() + '日（' + WD[now.getDay()] + '）';
 
 function cardHTML(d){
   const s = SIGNS[d.idx];
