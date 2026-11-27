@@ -251,6 +251,13 @@ function rankingFor(ds){
   arr.forEach((d, k) => {
     d.rank = k + 1;
     d.overall = Math.max(1, Math.min(5, Math.round(5 - k * 0.34 + (d.score - 0.5) * 0.5)));
+    // 分野別の運勢は総合運に連動させる（総合運±1の範囲で星座ごとに少しだけ変える）
+    const crnd = mulberry32(hashStr(ds + '|cat|' + d.idx));
+    const cat = () => Math.max(1, Math.min(5, d.overall + Math.floor(crnd() * 3) - 1));
+    d.love = cat();
+    d.money = cat();
+    d.work = cat();
+    d.health = cat();
   });
   return arr;
 }
