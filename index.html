@@ -113,13 +113,77 @@
   footer { margin-top: 40px; text-align: center; font-size: 12px; color: #9aa3c7; }
   footer a { color: #9aa3c7; margin: 0 10px; }
   footer .copy { margin-top: 10px; }
+
+  /* ===== 2026-11-27 タロット風テーマ（上書き） ===== */
+  body {
+    background: #0a0e20;
+    background-image:
+      radial-gradient(1.5px 1.5px at 12% 22%, rgba(255,255,255,.55), transparent 60%),
+      radial-gradient(1px 1px at 32% 68%, rgba(255,255,255,.4), transparent 60%),
+      radial-gradient(1.5px 1.5px at 55% 12%, rgba(255,255,255,.5), transparent 60%),
+      radial-gradient(1px 1px at 74% 44%, rgba(255,255,255,.35), transparent 60%),
+      radial-gradient(1.5px 1.5px at 88% 80%, rgba(255,255,255,.45), transparent 60%),
+      radial-gradient(1px 1px at 44% 90%, rgba(255,255,255,.3), transparent 60%);
+  }
+  .wrap {
+    position: relative;
+    border: 1px solid rgba(224,188,92,.55);
+    border-radius: 18px;
+    padding: 16px 14px 26px;
+    margin-top: 12px;
+    background:
+      radial-gradient(620px 300px at 50% -70px, rgba(224,188,92,.13), transparent 70%),
+      linear-gradient(180deg, #0e1330, #0d1124 240px);
+    box-shadow: inset 0 0 0 1px #0a0e20, inset 0 0 0 3px rgba(224,188,92,.22);
+  }
+  .fc { position: absolute; color: #e0bc5c; font-size: 15px; background: #0d1124; padding: 1px 5px; line-height: 1; z-index: 2; }
+  .fc.tl { top: -9px; left: -7px; } .fc.tr { top: -9px; right: -7px; }
+  .fc.bl { bottom: -9px; left: -7px; } .fc.br { bottom: -9px; right: -7px; }
+  h1 {
+    font-family: "Hiragino Mincho ProN", "Hiragino Mincho Pro", "Yu Mincho", "Noto Serif JP", serif;
+    color: #e8c877; letter-spacing: .14em;
+    text-shadow: 0 0 26px rgba(224,188,92,.30);
+  }
+  .orn { display: flex; align-items: center; justify-content: center; gap: 10px; color: #e0bc5c; font-size: 12px; margin-top: 3px; }
+  .orn::before, .orn::after { content: ''; width: 92px; height: 1px; background: linear-gradient(90deg, transparent, rgba(224,188,92,.75), transparent); }
+  h2 {
+    font-family: "Hiragino Mincho ProN", "Hiragino Mincho Pro", "Yu Mincho", "Noto Serif JP", serif;
+    color: #e8c877;
+  }
+  h2:not(.myh) { display: flex; align-items: center; gap: 12px; }
+  h2:not(.myh)::before, h2:not(.myh)::after { content: ''; flex: 1; height: 1px; background: linear-gradient(90deg, transparent, rgba(224,188,92,.5), transparent); }
+  .signpick button {
+    display: flex; flex-direction: column; align-items: center; gap: 2px;
+    padding: 10px 2px 8px; border-radius: 12px; font-size: 13px;
+    border: 1px solid rgba(224,188,92,.45);
+    background: linear-gradient(180deg, #1c2342, #131830);
+  }
+  .signpick button .psym { font-size: 27px; margin: 0; line-height: 1.15; }
+  .signpick button.sel {
+    background: linear-gradient(180deg, #f0d488, #dfb95c);
+    box-shadow: 0 0 16px rgba(224,188,92,.55);
+  }
+  .card {
+    border: 1px solid rgba(224,188,92,.35); border-radius: 16px;
+    background: linear-gradient(180deg, #1b2142, #171d38);
+  }
+  .rank { border-color: rgba(224,188,92,.5); }
+  .dcell { border: 1px solid rgba(224,188,92,.40); background: #12162c; border-radius: 12px; }
+  .dcell .k { font-family: "Hiragino Mincho ProN", "Yu Mincho", "Noto Serif JP", serif; letter-spacing: .18em; }
+  .sharebtn { border: 1px solid rgba(224,188,92,.6); background: #232a52; letter-spacing: .06em; }
+  table.week th, table.week td { border-color: rgba(224,188,92,.25); }
+  table.week th { background: #12162c; }
+  .top5, .method { border: 1px solid rgba(224,188,92,.35); background: linear-gradient(180deg, #1b2142, #171d38); }
+  .top5 .trow { border-bottom-color: rgba(224,188,92,.22); }
 </style>
 </head>
 <body>
 <div class="wrap">
+  <span class="fc tl">✦</span><span class="fc tr">✦</span><span class="fc bl">✦</span><span class="fc br">✦</span>
   <header>
     <div class="brand">MLucky</div>
     <h1>強運占い</h1>
+    <div class="orn">✦</div>
   </header>
 
   <h2 class="myh">今日のあなたの運勢<span class="sub" id="todayLine"></span></h2>
@@ -349,6 +413,15 @@ function starStr(n){
   for (let i = 1; i <= 5; i++) st += (i <= n ? '★' : '☆');
   return st;
 }
+function rr(c, x, y, w, h, r){
+  c.beginPath();
+  c.moveTo(x + r, y);
+  c.arcTo(x + w, y, x + w, y + h, r);
+  c.arcTo(x + w, y + h, x, y + h, r);
+  c.arcTo(x, y + h, x, y, r);
+  c.arcTo(x, y, x + w, y, r);
+  c.closePath();
+}
 function diamond(c, x, y, r){
   c.beginPath();
   c.moveTo(x, y - r); c.lineTo(x + r, y); c.lineTo(x, y + r); c.lineTo(x - r, y);
@@ -374,17 +447,22 @@ function shareCard(d){
   // タロットカード風フレーム（二重枠＋四隅のダイヤ＋小さな星）
   c.strokeStyle = '#e0bc5c'; c.lineWidth = 6; c.strokeRect(24, 24, 1032, 1632);
   c.lineWidth = 2; c.strokeRect(50, 50, 980, 1580);
+  c.strokeStyle = 'rgba(224,188,92,.55)'; c.lineWidth = 1; c.strokeRect(64, 64, 952, 1552);
   c.fillStyle = '#e0bc5c';
   [[50, 50], [1030, 50], [50, 1630], [1030, 1630]].forEach(p => diamond(c, p[0], p[1], 15));
   c.font = '30px sans-serif'; c.textAlign = 'center';
   c.fillText('✦', 150, 104); c.fillText('✦', 930, 104);
-  c.fillStyle = '#e0bc5c'; c.font = '700 66px sans-serif';
+  c.font = '42px serif';
+  c.fillText('☾', 100, 114); c.fillText('☽', 980, 114);
+  c.fillStyle = 'rgba(224,188,92,.8)'; c.font = '20px sans-serif';
+  c.fillText('✦', 182, 300); c.fillText('✦', 898, 300); c.fillText('✦', 168, 884); c.fillText('✦', 912, 884);
+  c.fillStyle = '#e0bc5c'; c.font = '700 66px "Hiragino Mincho ProN", "Yu Mincho", Georgia, serif';
   c.fillText('強運占い', 540, 168);
   c.fillStyle = '#edeade'; c.font = '36px sans-serif';
   c.fillText((now.getMonth()+1) + '月' + now.getDate() + '日（' + WD[now.getDay()] + '）', 540, 230);
   c.font = '128px sans-serif';
   c.fillText(s.sym, 540, 396);
-  c.font = '700 84px sans-serif';
+  c.font = '700 84px "Hiragino Mincho ProN", "Yu Mincho", Georgia, serif';
   c.fillText(s.name, 540, 504);
   c.fillStyle = '#9aa3c7'; c.font = '30px sans-serif';
   c.fillText(s.period, 540, 552);
@@ -410,20 +488,23 @@ function shareCard(d){
   cats.forEach((ct, i) => {
     const x = (i % 2 === 0) ? 300 : 780;
     const y = 982 + Math.floor(i / 2) * 108;
-    c.fillStyle = '#9aa3c7'; c.font = '31px sans-serif';
+    c.fillStyle = '#12162c';
+    c.strokeStyle = 'rgba(224,188,92,.5)'; c.lineWidth = 2;
+    rr(c, x - 196, y - 42, 392, 106, 14); c.fill(); c.stroke();
+    c.fillStyle = '#cfd3e8'; c.font = '31px "Hiragino Mincho ProN", "Yu Mincho", Georgia, serif';
     c.fillText(ct[0], x, y);
     c.fillStyle = '#e0bc5c'; c.font = '42px sans-serif';
     c.fillText(starStr(ct[1]), x, y + 52);
   });
   c.strokeStyle = '#3a4170';
-  c.beginPath(); c.moveTo(190, 1146); c.lineTo(890, 1146); c.stroke();
+  c.beginPath(); c.moveTo(190, 1184); c.lineTo(890, 1184); c.stroke();
   // ラッキー3項目（左端をそろえて表示）
   const luckies = [['ラッキーカラー：' + d.color[0], d.color[1]], ['ラッキーアイテム：' + d.item, '#e0bc5c'], ['ラッキーナンバー：' + d.number, '#e0bc5c']];
   c.font = '37px sans-serif';
   const maxTextW = Math.max.apply(null, luckies.map(lk => c.measureText(lk[0]).width));
   const textX = 540 - maxTextW / 2;
   luckies.forEach((lk, i) => {
-    const y = 1212 + i * 60;
+    const y = 1246 + i * 60;
     c.fillStyle = lk[1];
     c.beginPath(); c.arc(textX - 26, y - 12, 11, 0, Math.PI * 2); c.fill();
     c.strokeStyle = 'rgba(255,255,255,.35)'; c.lineWidth = 1; c.stroke();
@@ -432,7 +513,7 @@ function shareCard(d){
     c.textAlign = 'center';
   });
   c.fillStyle = '#cfd3e8'; c.font = '34px sans-serif';
-  balancedLines(c, d.text, 860, 4).forEach((ln, k) => c.fillText(ln, 540, 1420 + k * 50));
+  balancedLines(c, d.text, 860, 4).forEach((ln, k) => c.fillText(ln, 540, 1446 + k * 50));
   cv.toBlob((blob) => {
     if (!blob) return;
     const file = new File([blob], 'mlucky-uranai.png', { type: 'image/png' });
