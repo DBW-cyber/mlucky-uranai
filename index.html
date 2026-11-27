@@ -127,6 +127,7 @@
   <div class="signpick" id="signPick"></div>
   <div id="myCard"></div>
 
+  <h2>今日の12星座ランキング</h2>
   <div id="ranking"></div>
 
   <h2>週間ランキング比較<span class="sub">今日から7日間・数字は順位</span></h2>
@@ -260,7 +261,7 @@ const now = new Date();
 const todayStr = dateStrOf(now);
 const WD = ['日','月','火','水','木','金','土'];
 document.getElementById('todayLine').textContent =
-  now.getFullYear() + '年' + (now.getMonth()+1) + '月' + now.getDate() + '日（' + WD[now.getDay()] + '）のランキング';
+  now.getFullYear() + '年' + (now.getMonth()+1) + '月' + now.getDate() + '日（' + WD[now.getDay()] + '）';
 
 function cardHTML(d){
   const s = SIGNS[d.idx];
