@@ -223,6 +223,11 @@ function dayData(ds, idx){
 }
 function rankingFor(ds){
   const arr = SIGNS.map((s, i) => dayData(ds, i));
+  // 一言アドバイスは同じ日に12星座で重複しないよう、日単位のシャッフルで配り直す
+  const dayRnd = mulberry32(hashStr(ds + '|advice'));
+  const pool = ADVICE.slice();
+  for (let i = pool.length - 1; i > 0; i--){ const j = Math.floor(dayRnd() * (i + 1)); const t = pool[i]; pool[i] = pool[j]; pool[j] = t; }
+  arr.forEach((d, i) => { d.advice = pool[i % pool.length]; });
   arr.sort((a, b) => b.score - a.score);
   arr.forEach((d, k) => {
     d.rank = k + 1;
