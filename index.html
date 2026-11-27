@@ -218,6 +218,7 @@
     <div class="copy">お問い合わせ：mlucky.ai.jp@gmail.com<br>© 2026 MLucky（エムラッキー）</div>
   </footer>
 </div>
+<script src="astronomy.min.js"></script>
 <script>
 const SIGNS = [
   {name:'牡羊座', sym:'♈', period:'3/21〜4/19'},
@@ -306,7 +307,7 @@ function dayData(ds, idx){
   const number = 1 + Math.floor(rnd() * 31);
   return { idx, score, love, money, work, health, number, color, item, advice, text };
 }
-function rankingFor(ds){
+function rankingForHash(ds){
   const arr = SIGNS.map((s, i) => dayData(ds, i));
   // 一言アドバイスは同じ日に12星座で重複しないよう、日単位のシャッフルで配り直す
   const dayRnd = mulberry32(hashStr(ds + '|advice'));
@@ -327,6 +328,89 @@ function rankingFor(ds){
   });
   return arr;
 }
+
+// ===== 行運（トランジット）方式：2026-11-28 以降 =====
+// 月・太陽・惑星の実際の位置と、各星座の中央点（15°）との角度（アスペクト）で採点する。
+// 計算には Astronomy Engine（MIT, Don Cross）を使用。
+const TBODIES = [
+  { key:'Moon',    orb:6, w:1.0, cat:{love:.6, money:.3, work:.3, health:.7}, conj: 0.4 },
+  { key:'Sun',     orb:4, w:1.5, cat:{love:.3, money:.5, work:.6, health:.8}, conj: 0.4 },
+  { key:'Mercury', orb:4, w:1.0, cat:{love:.2, money:.6, work:1.0, health:.2}, conj: 0.2 },
+  { key:'Venus',   orb:4, w:1.5, cat:{love:1.0, money:.6, work:.2, health:.2}, conj: 1.0 },
+  { key:'Mars',    orb:4, w:1.5, cat:{love:.5, money:.3, work:.6, health:1.0}, conj:-0.7 },
+  { key:'Jupiter', orb:3, w:2.0, cat:{love:.5, money:1.0, work:.6, health:.3}, conj: 1.0 },
+  { key:'Saturn',  orb:3, w:2.0, cat:{love:.2, money:.6, work:.8, health:.5}, conj:-0.9 }
+];
+const TASPECTS = [[0, 'c'], [60, 0.6], [90, -0.8], [120, 1.0], [180, -0.6]];
+const TH_TOTAL = [0.93, 0.28, -0.02, -0.68];
+const TH_CAT = { love:[0.29, 0.12, -0.01, -0.17], money:[0.33, 0.09, -0.01, -0.23], work:[0.35, 0.08, -0.01, -0.23], health:[0.34, 0.14, -0.01, -0.23] };
+const T_CACHE = {};
+function tLon(key, date){
+  if (key === 'Moon') return Astronomy.EclipticGeoMoon(date).lon;
+  if (key === 'Sun') return Astronomy.SunPosition(date).elon;
+  return Astronomy.Ecliptic(Astronomy.GeoVector(Astronomy.Body[key], date, true)).elon;
+}
+function transitScores(ds){
+  if (T_CACHE[ds]) return T_CACHE[ds];
+  const p = ds.split('-').map(Number);
+  const totals = new Array(12).fill(0);
+  const acts = new Array(12).fill(0);
+  const cats = [];
+  for (let s = 0; s < 12; s++) cats.push({love:0, money:0, work:0, health:0});
+  for (let h = 0; h < 24; h += 3) {
+    const date = new Date(Date.UTC(p[0], p[1] - 1, p[2], h - 9));
+    const lons = TBODIES.map(b => tLon(b.key, date));
+    for (let s = 0; s < 12; s++) {
+      const mid = s * 30 + 15;
+      if (Math.floor(lons[0] / 30) === s) {
+        totals[s] += 0.30; acts[s] += 0.30;
+        for (const k of ['love','money','work','health']) cats[s][k] += TBODIES[0].cat[k] * 0.30;
+      }
+      TBODIES.forEach((b, bi) => {
+        let sep = Math.abs(lons[bi] - mid) % 360; if (sep > 180) sep = 360 - sep;
+        for (const asp of TASPECTS) {
+          const dev = Math.abs(sep - asp[0]);
+          if (dev <= b.orb) {
+            const v = (asp[0] === 0 ? b.conj : asp[1]) * (1 - dev / b.orb);
+            totals[s] += b.w * v;
+            acts[s] += Math.abs(b.w * v);
+            for (const k of ['love','money','work','health']) cats[s][k] += b.cat[k] * v;
+            break;
+          }
+        }
+      });
+    }
+  }
+  for (let s = 0; s < 12; s++) { totals[s] /= 8; acts[s] /= 8; for (const k of ['love','money','work','health']) cats[s][k] /= 8; }
+  const out = { totals, cats, acts };
+  T_CACHE[ds] = out;
+  return out;
+}
+function starMap(v, th){ return v >= th[0] ? 5 : v >= th[1] ? 4 : v >= th[2] ? 3 : v >= th[3] ? 2 : 1; }
+function rankingForTransit(ds){
+  const sc = transitScores(ds);
+  const arr = SIGNS.map((s, idx) => dayData(ds, idx));
+  const dayRnd = mulberry32(hashStr(ds + '|advice'));
+  const pool = ADVICE.slice();
+  for (let i = pool.length - 1; i > 0; i--){ const j = Math.floor(dayRnd() * (i + 1)); const t = pool[i]; pool[i] = pool[j]; pool[j] = t; }
+  arr.forEach((d, i) => { d.advice = pool[i % pool.length]; });
+  arr.forEach(d => {
+    d.tscore = sc.totals[d.idx];
+    d.overall = starMap(d.tscore, TH_TOTAL);
+    for (const k of ['love','money','work','health']) {
+      const v = starMap(sc.cats[d.idx][k], TH_CAT[k]);
+      d[k] = Math.max(d.overall - 1, Math.min(d.overall + 1, v));
+    }
+  });
+  arr.sort((a, b) => (b.tscore - a.tscore) || (sc.acts[b.idx] - sc.acts[a.idx]) || (hashStr(ds + '|tie|' + a.idx) - hashStr(ds + '|tie|' + b.idx)));
+  arr.forEach((d, k) => { d.rank = k + 1; });
+  return arr;
+}
+function rankingFor(ds){
+  if (ds >= '2026-11-28' && typeof Astronomy !== 'undefined') return rankingForTransit(ds);
+  return rankingForHash(ds);
+}
+
 function stars(n){ let s = ''; for (let i=1;i<=5;i++){ s += '<span class="' + (i<=n ? '' : 'off') + '">★</span>'; } return s; }
 
 const now = new Date();
