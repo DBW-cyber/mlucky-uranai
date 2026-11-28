@@ -1,5 +1,5 @@
 /* MLucky Uranai i18n part 2: +7 languages (es hi pt id fr ar ru) = 10 total. Loaded after i18n.js. */
-const LANGS10 = ['es','hi','pt','id','zh','en','ja','fr','ar','ru'];
+const LANGS10 = ['es','hi','zh','pt','id','fr','ar','en','ru','ja'];
 const FLAG_OF = { es: 'es', hi: 'in', pt: 'br', id: 'id', zh: 'cn', en: 'gb', ja: 'jp', fr: 'fr', ar: 'sa', ru: 'ru' };
 const LANG_LABEL = { es: 'Español', hi: 'हिन्दी', pt: 'Português', id: 'Bahasa Indonesia', zh: '中文', en: 'English', ja: '日本語', fr: 'Français', ar: 'العربية', ru: 'Русский' };
 function flagRowHTML() {
