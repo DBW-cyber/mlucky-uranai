@@ -558,8 +558,9 @@ const rankDiv = document.getElementById('ranking');
 rankingFor(todayStr).forEach(d => {
   const card = document.createElement('div');
   card.className = 'card';
-  card.innerHTML = cardHTML(d);
+  card.innerHTML = cardHTML(d) + '<button type="button" class="sharebtn">今日の運勢カードを画像でシェア</button>';
   card.addEventListener('click', () => card.classList.toggle('open'));
+  card.querySelector('.sharebtn').addEventListener('click', (ev) => { ev.stopPropagation(); shareCard(d); });
   rankDiv.appendChild(card);
 });
 
