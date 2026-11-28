@@ -180,6 +180,11 @@
   .top5, .method { border: 1px solid rgba(224,188,92,.35); background: linear-gradient(180deg, #1b2142, #171d38); }
   .top5 .trow { border-bottom-color: rgba(224,188,92,.22); }
   .off { color: #3a4170; }
+  .langrow { display: flex; justify-content: center; align-items: center; gap: 16px; margin: 22px auto 2px; max-width: 680px; }
+  .langrow button { background: none; border: none; padding: 0; cursor: pointer; border-radius: 50%; line-height: 0; font-family: inherit; }
+  .langrow img { width: 44px; height: 44px; border-radius: 50%; display: block; box-shadow: 0 3px 8px rgba(0,0,0,.5); }
+  .langrow button[data-lang="en"] img { width: 48px; height: 48px; }
+  .langrow button.sel img { box-shadow: 0 0 0 2px #e0bc5c, 0 3px 10px rgba(224,188,92,.45); }
 </style>
 </head>
 <body>
@@ -187,30 +192,30 @@
   <span class="fc tl">✦</span><span class="fc tr">✦</span><span class="fc bl">✦</span><span class="fc br">✦</span>
   <header>
     <div class="brand">MLucky</div>
-    <h1>強運占い</h1>
+    <h1 id="h1Title">強運占い</h1>
     <div class="orn">✦</div>
   </header>
 
-  <h2 class="myh">今日のあなたの運勢<span class="sub" id="todayLine"></span></h2>
+  <h2 class="myh"><span id="myH">今日のあなたの運勢</span><span class="sub" id="todayLine"></span></h2>
   <div class="signpick" id="signPick"></div>
   <div id="myCard"></div>
 
-  <h2 class="rankh">今日の12星座ランキング</h2>
+  <h2 class="rankh" id="rankH">今日の12星座ランキング</h2>
   <div id="ranking"></div>
 
-  <h2>週間ランキング比較</h2>
+  <h2 id="weekH">週間ランキング比較</h2>
   <div style="overflow-x:auto;">
     <table class="week" id="weekTable"></table>
   </div>
 
-  <h2>今月の強運 TOP5</h2>
+  <h2 id="top5H">今月の強運 TOP5</h2>
   <div class="top5" id="top5"></div>
 
-  <h2>毎日運勢を見るメリット</h2>
+  <h2 id="benefitsH">毎日運勢を見るメリット</h2>
   <div class="method" id="benefitsBody"></div>
 
-  <h2>この占いの仕組み</h2>
-  <div class="method">
+  <h2 id="methodH">この占いの仕組み</h2>
+  <div class="method" id="methodBody">
     <p>このサイトの運勢は、くじを引くような偶然でも、決まった順番の使い回しでもありません。土台にあるのは、西洋占星術に古くからある「トランジット」という考え方です。その日の空で、月と太陽、水星、金星、火星、木星、土星の七つの天体が実際にどこにいて、あなたの星座とどんな角度を結んでいるか。その結びつきの強さを一つひとつ点数に換え、並べ直したものが、このランキングです。</p>
     <p>天体の位置は、公開されている天文計算の仕組み（Astronomy Engine）を用いて、あなたの端末の中で、その日の空のままに計算しています。角度の種類や近さ、天体ごとの重みづけといった採点の決まりは、占星術の伝統に沿って定めた固定のものです。ラッキーカラーやラッキーアイテムも、その日に最も強く働く天体に結びついた、伝統的な対応から引いています。計算の考え方は「運営者情報・広告表記」のページにも記しました。仕組みは、隠さないことにしています。</p>
     <p>もちろん、星の並びが人の一生を決めるわけではありません。占いは科学の証明を受けた知識ではなく、長い時間をかけて人の暮らしに寄り添ってきた、ものの見方の一つです。だからこそ、出どころの分からない断定ではなく、仕組みの見える計算を選びました。結果は鵜呑みにせず、朝の身支度のついでに眺める、小さな鏡としてお使いください。良い日は背中を押す合図に、静かな日は休む口実に。最後に決めるのは、いつもあなた自身です。</p>
@@ -218,13 +223,15 @@
 
   <footer>
     <div>
-      <a href="about.html">運営者情報・広告表記</a>
-      <a href="privacy.html">プライバシーポリシー</a>
+      <a href="about.html" id="aboutLink">運営者情報・広告表記</a>
+      <a href="privacy.html" id="privacyLink">プライバシーポリシー</a>
     </div>
-    <div class="copy">お問い合わせ：mlucky.ai.jp@gmail.com<br>© 2026 MLucky（エムラッキー）</div>
+    <div class="copy"><span id="contactLine">お問い合わせ：mlucky.ai.jp@gmail.com</span><br><span id="copyLine">© 2026 MLucky（エムラッキー）</span></div>
   </footer>
 </div>
+<div id="flagRow"></div>
 <script src="astronomy.min.js"></script>
+<script src="i18n.js"></script>
 <script>
 const SIGNS = [
   {name:'牡羊座', sym:'♈', period:'3/21〜4/19'},
@@ -468,12 +475,14 @@ const PLANET_LUCKY = {
   Jupiter: { number: 3, colors: [['パープル','#7d5ba6'], ['ネイビー','#33507a']], items: ['長財布','ハードカバーの本','旅行ポーチ','紅茶の缶'] },
   Saturn:  { number: 8, colors: [['ブラック','#2b2b30'], ['ブラウン','#8a5a33']], items: ['腕時計','革のキーケース','眼鏡','クラシックな傘'] }
 };
+const BANKS = { ja: { THEME: THEME, HOUSE_TXT: HOUSE_TXT, CLOSE_TXT: CLOSE_TXT, ADV_ASTRO: ADV_ASTRO, ADV_QUIET: ADV_QUIET, HOUSE_ADV: HOUSE_ADV, PLANET_LUCKY: PLANET_LUCKY }, en: BANKS_EN, zh: BANKS_ZH };
+function BK(){ return BANKS[LANG]; }
 function astroLucky(ds, d, sc){
   const net = sc.nets[d.idx];
   let dom = null, domAbs = 0.02;
   TBODIES.forEach(b => { const a = Math.abs(net[b.key]); if (a > domAbs) { domAbs = a; dom = b.key; } });
   const srcPlanet = dom || RULERS[sc.moonSign];
-  const L = PLANET_LUCKY[srcPlanet];
+  const L = BK().PLANET_LUCKY[srcPlanet];
   const rnd = mulberry32(hashStr(ds + '|lucky|' + d.idx));
   d.color = L.colors[Math.floor(rnd() * L.colors.length)];
   d.item = L.items[Math.floor(rnd() * L.items.length)];
@@ -491,10 +500,10 @@ function astroCompose(ds, d, sc){
   let text, advPool = null;
   if (dom) {
     const tone = net[dom] >= 0 ? 'good' : 'hard';
-    text = pick(THEME[dom][tone]) + HOUSE_TXT[house] + pick(CLOSE_TXT[tier]);
-    advPool = ADV_ASTRO[dom][tone];
+    text = pick(BK().THEME[dom][tone]) + (LANG === 'en' ? ' ' : '') + BK().HOUSE_TXT[house] + (LANG === 'en' ? ' ' : '') + pick(BK().CLOSE_TXT[tier]);
+    advPool = BK().ADV_ASTRO[dom][tone];
   } else {
-    text = '今日は大きな星の角度が少ない、静かな一日です。' + HOUSE_TXT[house] + pick(CLOSE_TXT[tier]);
+    text = U().quietOpen + BK().HOUSE_TXT[house] + (LANG === 'en' ? ' ' : '') + pick(BK().CLOSE_TXT[tier]);
   }
   return { text, advPool, tier, house };
 }
@@ -515,7 +524,7 @@ function rankingForTransit(ds){
   arr.forEach((d, k) => { d.rank = k + 1; });
   const usedAdv = new Set();
   arr.forEach(d => {
-    const pool = d.advPool || ADV_QUIET[d.tier].concat([HOUSE_ADV[d.houseIdx]]);
+    const pool = d.advPool || BK().ADV_QUIET[d.tier].concat([BK().HOUSE_ADV[d.houseIdx]]);
     const rnd = mulberry32(hashStr(ds + '|adv|' + d.idx));
     const start = Math.floor(rnd() * pool.length);
     let chosen = pool[start];
@@ -536,52 +545,56 @@ function stars(n){ let s = ''; for (let i=1;i<=5;i++){ s += '<span class="' + (i
 const now = new Date();
 const todayStr = dateStrOf(now);
 const WD = ['日','月','火','水','木','金','土'];
-document.getElementById('todayLine').textContent =
-  (now.getMonth()+1) + '月' + now.getDate() + '日（' + WD[now.getDay()] + '）';
+function renderTodayLine(){ document.getElementById('todayLine').textContent = fmtDate(now); }
 
 function cardHTML(d){
   const s = SIGNS[d.idx];
   return '<div class="row">' +
       '<div class="rank ' + (d.rank<=3 ? 'r'+d.rank : '') + '">' + d.rank + '</div>' +
       '<div class="sym">' + s.sym + '</div>' +
-      '<div><div class="sname">' + s.name + '</div><div class="speriod">' + s.period + '</div></div>' +
-      '<div class="sright"><div class="stars">' + stars(d.overall) + '</div><div class="slabel">総合運</div></div>' +
+      '<div><div class="sname">' + signName(d.idx) + '</div><div class="speriod">' + signPeriod(d.idx) + '</div></div>' +
+      '<div class="sright"><div class="stars">' + stars(d.overall) + '</div><div class="slabel">' + U().overall + '</div></div>' +
     '</div>' +
     '<div class="advice">' + d.advice + '</div>' +
     '<div class="detail">' +
       '<div class="dgrid">' +
-        '<div class="dcell"><div class="k">恋愛運</div><div class="v">' + stars(d.love) + '</div></div>' +
-        '<div class="dcell"><div class="k">金運</div><div class="v">' + stars(d.money) + '</div></div>' +
-        '<div class="dcell"><div class="k">仕事運</div><div class="v">' + stars(d.work) + '</div></div>' +
-        '<div class="dcell"><div class="k">健康運</div><div class="v">' + stars(d.health) + '</div></div>' +
+        '<div class="dcell"><div class="k">' + U().love + '</div><div class="v">' + stars(d.love) + '</div></div>' +
+        '<div class="dcell"><div class="k">' + U().money + '</div><div class="v">' + stars(d.money) + '</div></div>' +
+        '<div class="dcell"><div class="k">' + U().work + '</div><div class="v">' + stars(d.work) + '</div></div>' +
+        '<div class="dcell"><div class="k">' + U().health + '</div><div class="v">' + stars(d.health) + '</div></div>' +
       '</div>' +
-      '<div class="lucky"><span class="dot" style="background:' + d.color[1] + '"></span>ラッキーカラー：' + d.color[0] + '</div>' +
-      '<div class="lucky"><span class="dot" style="background:#e0bc5c"></span>ラッキーアイテム：<a class="itemlink" href="https://www.google.com/search?tbm=shop&q=' + encodeURIComponent(d.item + ' ' + d.color[0] + ' ' + d.number) + '" target="_blank" rel="noopener">' + d.item + ' ↗</a></div>' +
-      '<div class="lucky"><span class="dot" style="background:#e0bc5c"></span>ラッキーナンバー：' + d.number + '</div>' +
+      '<div class="lucky"><span class="dot" style="background:' + d.color[1] + '"></span>' + U().luckyColor + d.color[0] + '</div>' +
+      '<div class="lucky"><span class="dot" style="background:#e0bc5c"></span>' + U().luckyItem + '<a class="itemlink" href="https://www.google.com/search?tbm=shop&q=' + encodeURIComponent(d.item + ' ' + d.color[0] + ' ' + d.number) + '" target="_blank" rel="noopener">' + d.item + ' ↗</a></div>' +
+      '<div class="lucky"><span class="dot" style="background:#e0bc5c"></span>' + U().luckyNumber + d.number + '</div>' +
       '<div class="long">' + d.text + '</div>' +
     '</div>' +
     '<div class="chev"><svg viewBox="0 0 24 20" aria-hidden="true"><polyline points="4,3 12,10 20,3"/><polyline points="4,11 12,18 20,11"/></svg></div>';
 }
 
-const rankDiv = document.getElementById('ranking');
-rankingFor(todayStr).forEach(d => {
-  const card = document.createElement('div');
-  card.className = 'card';
-  card.innerHTML = cardHTML(d);
-  card.addEventListener('click', () => card.classList.toggle('open'));
-  rankDiv.appendChild(card);
-});
+function renderRanking(){
+  const rankDiv = document.getElementById('ranking');
+  rankDiv.innerHTML = '';
+  rankingFor(todayStr).forEach(d => {
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = cardHTML(d);
+    card.addEventListener('click', () => card.classList.toggle('open'));
+    rankDiv.appendChild(card);
+  });
+}
 
 // あなたの運勢（星座はこの端末にだけ保存されます）
 const SIGN_KEY = 'mlucky_uranai_sign';
 let mySign = null;
 try { const v = localStorage.getItem(SIGN_KEY); if (v !== null && v !== '') mySign = parseInt(v, 10); } catch(e) {}
 if (mySign !== null && (isNaN(mySign) || mySign < 0 || mySign > 11)) mySign = null;
-const pickDiv = document.getElementById('signPick');
-SIGNS.forEach((s, i) => {
+function renderPick(){
+  const pickDiv = document.getElementById('signPick');
+  pickDiv.innerHTML = '';
+  SIGNS.forEach((s, i) => {
   const b = document.createElement('button');
   b.type = 'button';
-  b.innerHTML = '<span class="psym">' + s.sym + '</span>' + s.name;
+  b.innerHTML = '<span class="psym">' + s.sym + '</span>' + signName(i);
   if (i === mySign) b.className = 'sel';
   b.addEventListener('click', () => {
     mySign = i;
@@ -590,7 +603,8 @@ SIGNS.forEach((s, i) => {
     renderMy();
   });
   pickDiv.appendChild(b);
-});
+  });
+}
 function renderMy(){
   const box = document.getElementById('myCard');
   box.innerHTML = '';
@@ -598,7 +612,7 @@ function renderMy(){
   const d = rankingFor(todayStr).find(x => x.idx === mySign);
   const card = document.createElement('div');
   card.className = 'card';
-  card.innerHTML = cardHTML(d) + '<button type="button" class="sharebtn" id="shareBtn">今日の運勢カードを画像でシェア</button>';
+  card.innerHTML = cardHTML(d) + '<button type="button" class="sharebtn" id="shareBtn">' + U().shareBtn + '</button>';
   card.addEventListener('click', () => card.classList.toggle('open'));
   box.appendChild(card);
   document.getElementById('shareBtn').addEventListener('click', (ev) => { ev.stopPropagation(); shareCard(d); });
@@ -662,17 +676,17 @@ function shareCard(d){
   c.fillStyle = 'rgba(224,188,92,.8)'; c.font = '20px sans-serif';
   c.fillText('✦', 182, 300); c.fillText('✦', 898, 300); c.fillText('✦', 168, 884); c.fillText('✦', 912, 884);
   c.fillStyle = '#e0bc5c'; c.font = '700 66px "Hiragino Mincho ProN", "Yu Mincho", Georgia, serif';
-  c.fillText('強運占い', 540, 168);
+  c.fillText(U().shareCardTitle, 540, 168);
   c.fillStyle = '#edeade'; c.font = '36px sans-serif';
-  c.fillText((now.getMonth()+1) + '月' + now.getDate() + '日（' + WD[now.getDay()] + '）', 540, 230);
+  c.fillText(fmtDate(now), 540, 230);
   c.font = '128px sans-serif';
   c.fillText(s.sym, 540, 396);
   c.font = '700 84px "Hiragino Mincho ProN", "Yu Mincho", Georgia, serif';
-  c.fillText(s.name, 540, 504);
+  c.fillText(signName(d.idx), 540, 504);
   c.fillStyle = '#9aa3c7'; c.font = '30px sans-serif';
-  c.fillText(s.period, 540, 552);
+  c.fillText(signPeriod(d.idx), 540, 552);
   c.fillStyle = '#e0bc5c'; c.font = '700 58px sans-serif';
-  const rankTxt = '第' + d.rank + '位';
+  const rankTxt = rankStr(d.rank);
   const rankW = c.measureText(rankTxt).width;
   c.font = '62px sans-serif';
   const starTxt = starStr(d.overall);
@@ -689,7 +703,7 @@ function shareCard(d){
   c.strokeStyle = '#3a4170'; c.lineWidth = 2;
   c.beginPath(); c.moveTo(190, 912); c.lineTo(890, 912); c.stroke();
   // 分野別（画面のカードと同じ内容）
-  const cats = [['恋愛運', d.love], ['金運', d.money], ['仕事運', d.work], ['健康運', d.health]];
+  const cats = [[U().love, d.love], [U().money, d.money], [U().work, d.work], [U().health, d.health]];
   cats.forEach((ct, i) => {
     const x = (i % 2 === 0) ? 300 : 780;
     const y = 982 + Math.floor(i / 2) * 108;
@@ -704,7 +718,7 @@ function shareCard(d){
   c.strokeStyle = '#3a4170';
   c.beginPath(); c.moveTo(190, 1184); c.lineTo(890, 1184); c.stroke();
   // ラッキー3項目（左端をそろえて表示）
-  const luckies = [['ラッキーカラー：' + d.color[0], d.color[1]], ['ラッキーアイテム：' + d.item, '#e0bc5c'], ['ラッキーナンバー：' + d.number, '#e0bc5c']];
+  const luckies = [[U().luckyColor + d.color[0], d.color[1]], [U().luckyItem + d.item, '#e0bc5c'], [U().luckyNumber + d.number, '#e0bc5c']];
   c.font = '37px sans-serif';
   const maxTextW = Math.max.apply(null, luckies.map(lk => c.measureText(lk[0]).width));
   const textX = 540 - maxTextW / 2;
@@ -723,7 +737,7 @@ function shareCard(d){
     if (!blob) return;
     const file = new File([blob], 'mlucky-uranai.png', { type: 'image/png' });
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
-      navigator.share({ files: [file], title: 'MLucky 強運占い' }).catch(() => {});
+      navigator.share({ files: [file], title: U().shareTitle }).catch(() => {});
     } else {
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
@@ -797,51 +811,93 @@ const BENEFITS = [
       '家族との約束：土星は責任と絆の星でもあります。大事な予定がある日は、運勢を見て心構えができます。',
       '来週への土台づくり：低い日は無理をせず休むことが土星的な正解。休息も基盤づくりの一部だと分かります。'] } }
 ];
+const BENEFITS_ALL = { ja: BENEFITS, en: BENEFITS_EN, zh: BENEFITS_ZH };
 function renderBenefits(){
-  const b = BENEFITS[now.getDay()][isOffDay(now) ? 'off' : 'work'];
+  const b = BENEFITS_ALL[LANG][now.getDay()][isOffDay(now) ? 'off' : 'work'];
   let h = '<p class="blead">' + b.lead + '</p>';
-  b.pts.forEach(p => { const i = p.indexOf('：'); h += (i > 0) ? '<p><span class="bk">' + p.slice(0, i) + '</span>：' + p.slice(i + 1) + '</p>' : '<p>' + p + '</p>'; });
-  h += '<p>占いの結果はエンターテインメントとしてお楽しみください。大切な決断は、ご自身の判断を大切に。</p>';
+  b.pts.forEach(p => {
+    const i1 = p.indexOf('：'), i2 = p.indexOf(': ');
+    let i = -1, sep = '：';
+    if (i1 > 0 && (i2 < 0 || i1 < i2)) { i = i1; sep = '：'; }
+    else if (i2 > 0) { i = i2; sep = ': '; }
+    h += (i > 0) ? '<p><span class="bk">' + p.slice(0, i) + '</span>' + sep + p.slice(i + sep.length) + '</p>' : '<p>' + p + '</p>';
+  });
+  h += '<p>' + U().benefitsClose + '</p>';
   document.getElementById('benefitsBody').innerHTML = h;
 }
 
-renderBenefits();
 // アイテムのショッピングリンクをタップしてもカードが開閉しないようにする
 document.addEventListener('click', (e) => { if (e.target.closest('.itemlink')) e.stopPropagation(); }, true);
 
 // 週間比較（今日から7日間）
-const weekTable = document.getElementById('weekTable');
-const weekDays = [];
-for (let o=0; o<7; o++){ const d = new Date(now); d.setDate(d.getDate()+o); weekDays.push(d); }
-const weekRanks = weekDays.map(d => {
-  const r = rankingFor(dateStrOf(d));
-  const byIdx = new Array(12);
-  r.forEach(x => byIdx[x.idx] = x.rank);
-  return byIdx;
-});
-let wh = '<tr><th>星座</th>' + weekDays.map((d,o) => '<th>' + (d.getMonth()+1) + '/' + d.getDate() + '（' + WD[d.getDay()] + '）' + (o===0 ? '<br>今日' : '') + '</th>').join('') + '</tr>';
-SIGNS.forEach((s, i) => {
-  wh += '<tr><td class="sn">' + s.sym + ' ' + s.name + '</td>' + weekRanks.map((byIdx, o) =>
-    '<td class="' + (o===0 ? 'today-col' : '') + (byIdx[i]===1 ? ' best' : '') + '">' + byIdx[i] + '</td>').join('') + '</tr>';
-});
-weekTable.innerHTML = wh;
+function renderWeek(){
+  const weekTable = document.getElementById('weekTable');
+  const weekDays = [];
+  for (let o=0; o<7; o++){ const d = new Date(now); d.setDate(d.getDate()+o); weekDays.push(d); }
+  const weekRanks = weekDays.map(d => {
+    const r = rankingFor(dateStrOf(d));
+    const byIdx = new Array(12);
+    r.forEach(x => byIdx[x.idx] = x.rank);
+    return byIdx;
+  });
+  let wh = '<tr><th>' + U().signCol + '</th>' + weekDays.map((d,o) => '<th>' + fmtShort(d) + (o===0 ? '<br>' + U().today : '') + '</th>').join('') + '</tr>';
+  SIGNS.forEach((s, i) => {
+    wh += '<tr><td class="sn">' + s.sym + ' ' + signName(i) + '</td>' + weekRanks.map((byIdx, o) =>
+      '<td class="' + (o===0 ? 'today-col' : '') + (byIdx[i]===1 ? ' best' : '') + '">' + byIdx[i] + '</td>').join('') + '</tr>';
+  });
+  weekTable.innerHTML = wh;
+}
 
 // 今月の TOP5（平均順位）
-const y = now.getFullYear(), mo = now.getMonth();
-const lastDay = new Date(y, mo+1, 0).getDate();
-const sums = new Array(12).fill(0);
-for (let dd=1; dd<=lastDay; dd++){
-  const ds = y + '-' + String(mo+1).padStart(2,'0') + '-' + String(dd).padStart(2,'0');
-  rankingFor(ds).forEach(x => sums[x.idx] += x.rank);
+function renderTop5(){
+  const y = now.getFullYear(), mo = now.getMonth();
+  const lastDay = new Date(y, mo+1, 0).getDate();
+  const sums = new Array(12).fill(0);
+  for (let dd=1; dd<=lastDay; dd++){
+    const ds = y + '-' + String(mo+1).padStart(2,'0') + '-' + String(dd).padStart(2,'0');
+    rankingFor(ds).forEach(x => sums[x.idx] += x.rank);
+  }
+  const top5 = SIGNS.map((s, i) => ({ i, avg: sums[i] / lastDay }))
+    .sort((a, b) => a.avg - b.avg).slice(0, 5);
+  document.getElementById('top5').innerHTML = top5.map((t, k) => {
+    const s = SIGNS[t.i];
+    return '<div class="trow"><div class="rank ' + (k<3 ? 'r'+(k+1) : '') + '">' + (k+1) + '</div>' +
+      '<div class="sym">' + s.sym + '</div><div class="sname">' + signName(t.i) + '</div>' +
+      '<div class="avg">' + avgRankStr(mo+1, t.avg.toFixed(1)) + '</div></div>';
+  }).join('');
 }
-const top5 = SIGNS.map((s, i) => ({ i, avg: sums[i] / lastDay }))
-  .sort((a, b) => a.avg - b.avg).slice(0, 5);
-document.getElementById('top5').innerHTML = top5.map((t, k) => {
-  const s = SIGNS[t.i];
-  return '<div class="trow"><div class="rank ' + (k<3 ? 'r'+(k+1) : '') + '">' + (k+1) + '</div>' +
-    '<div class="sym">' + s.sym + '</div><div class="sname">' + s.name + '</div>' +
-    '<div class="avg">' + (mo+1) + '月の平均順位 ' + t.avg.toFixed(1) + '位</div></div>';
-}).join('');
+
+// ===== 言語適用と初期描画 =====
+function applyStatic(){
+  const u = U();
+  document.title = u.title;
+  document.documentElement.lang = LANG === 'zh' ? 'zh-CN' : LANG;
+  document.getElementById('h1Title').textContent = u.h1;
+  document.getElementById('myH').textContent = u.myH;
+  document.getElementById('rankH').textContent = u.rankH;
+  document.getElementById('weekH').textContent = u.weekH;
+  document.getElementById('top5H').textContent = u.top5H;
+  document.getElementById('benefitsH').textContent = u.benefitsH;
+  document.getElementById('methodH').textContent = u.methodH;
+  document.getElementById('methodBody').innerHTML = METHOD_T[LANG].map(t => '<p>' + t + '</p>').join('');
+  document.getElementById('aboutLink').textContent = u.aboutLink;
+  document.getElementById('privacyLink').textContent = u.privacyLink;
+  document.getElementById('contactLine').textContent = u.contact + 'mlucky.ai.jp@gmail.com';
+  document.getElementById('copyLine').textContent = u.copy;
+}
+function renderAll(){
+  applyStatic();
+  renderTodayLine();
+  renderPick();
+  renderMy();
+  renderRanking();
+  renderWeek();
+  renderTop5();
+  renderBenefits();
+}
+document.getElementById('flagRow').innerHTML = flagRowHTML();
+bindFlags(renderAll);
+renderAll();
 </script>
 </body>
 </html>
