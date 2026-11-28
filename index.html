@@ -180,7 +180,9 @@
   .top5, .method { border: 1px solid rgba(224,188,92,.35); background: linear-gradient(180deg, #1b2142, #171d38); }
   .top5 .trow { border-bottom-color: rgba(224,188,92,.22); }
   .off { color: #3a4170; }
-  .langrow { display: flex; justify-content: center; align-items: center; gap: 16px; margin: 22px auto 2px; max-width: 680px; }
+  .langrow { display: flex; justify-content: center; align-items: center; gap: 10px; margin: 22px auto 2px; max-width: 680px; flex-wrap: wrap; padding: 0 10px; }
+  .langrow button { position: relative; }
+  .langrow button::after { content: ""; position: absolute; left: 0; top: 0; width: 36px; height: 36px; border-radius: 50%; background: radial-gradient(circle at 32% 26%, rgba(255,255,255,.38), rgba(255,255,255,0) 55%); pointer-events: none; }
   .langrow button { background: none; border: none; padding: 0; cursor: pointer; border-radius: 50%; line-height: 0; font-family: inherit; }
   .langrow img { width: 36px; height: 36px; border-radius: 50%; display: block; box-shadow: 0 3px 8px rgba(0,0,0,.5); }
   .langrow button.sel img { box-shadow: 0 0 0 2px #e0bc5c, 0 3px 10px rgba(224,188,92,.45); }
@@ -231,6 +233,7 @@
 <div id="flagRow"></div>
 <script src="astronomy.min.js"></script>
 <script src="i18n.js"></script>
+<script src="i18n2.js"></script>
 <script>
 const SIGNS = [
   {name:'牡羊座', sym:'♈', period:'3/21〜4/19'},
@@ -474,7 +477,7 @@ const PLANET_LUCKY = {
   Jupiter: { number: 3, colors: [['パープル','#7d5ba6'], ['ネイビー','#33507a']], items: ['長財布','ハードカバーの本','旅行ポーチ','紅茶の缶'] },
   Saturn:  { number: 8, colors: [['ブラック','#2b2b30'], ['ブラウン','#8a5a33']], items: ['腕時計','革のキーケース','眼鏡','クラシックな傘'] }
 };
-const BANKS = { ja: { THEME: THEME, HOUSE_TXT: HOUSE_TXT, CLOSE_TXT: CLOSE_TXT, ADV_ASTRO: ADV_ASTRO, ADV_QUIET: ADV_QUIET, HOUSE_ADV: HOUSE_ADV, PLANET_LUCKY: PLANET_LUCKY }, en: BANKS_EN, zh: BANKS_ZH };
+const BANKS = { ja: { THEME: THEME, HOUSE_TXT: HOUSE_TXT, CLOSE_TXT: CLOSE_TXT, ADV_ASTRO: ADV_ASTRO, ADV_QUIET: ADV_QUIET, HOUSE_ADV: HOUSE_ADV, PLANET_LUCKY: PLANET_LUCKY }, en: BANKS_EN, zh: BANKS_ZH, es: BANKS_ES, hi: BANKS_HI, pt: BANKS_PT, id: BANKS_ID, fr: BANKS_FR, ar: BANKS_AR, ru: BANKS_RU };
 function BK(){ return BANKS[LANG]; }
 function astroLucky(ds, d, sc){
   const net = sc.nets[d.idx];
@@ -499,10 +502,10 @@ function astroCompose(ds, d, sc){
   let text, advPool = null;
   if (dom) {
     const tone = net[dom] >= 0 ? 'good' : 'hard';
-    text = pick(BK().THEME[dom][tone]) + (LANG === 'en' ? ' ' : '') + BK().HOUSE_TXT[house] + (LANG === 'en' ? ' ' : '') + pick(BK().CLOSE_TXT[tier]);
+    text = pick(BK().THEME[dom][tone]) + (LANG === 'ja' || LANG === 'zh' ? '' : ' ') + BK().HOUSE_TXT[house] + (LANG === 'ja' || LANG === 'zh' ? '' : ' ') + pick(BK().CLOSE_TXT[tier]);
     advPool = BK().ADV_ASTRO[dom][tone];
   } else {
-    text = U().quietOpen + BK().HOUSE_TXT[house] + (LANG === 'en' ? ' ' : '') + pick(BK().CLOSE_TXT[tier]);
+    text = U().quietOpen + BK().HOUSE_TXT[house] + (LANG === 'ja' || LANG === 'zh' ? '' : ' ') + pick(BK().CLOSE_TXT[tier]);
   }
   return { text, advPool, tier, house };
 }
@@ -810,7 +813,7 @@ const BENEFITS = [
       '家族との約束：土星は責任と絆の星でもあります。大事な予定がある日は、運勢を見て心構えができます。',
       '来週への土台づくり：低い日は無理をせず休むことが土星的な正解。休息も基盤づくりの一部だと分かります。'] } }
 ];
-const BENEFITS_ALL = { ja: BENEFITS, en: BENEFITS_EN, zh: BENEFITS_ZH };
+const BENEFITS_ALL = { ja: BENEFITS, en: BENEFITS_EN, zh: BENEFITS_ZH, es: BENEFITS_ES, hi: BENEFITS_HI, pt: BENEFITS_PT, id: BENEFITS_ID, fr: BENEFITS_FR, ar: BENEFITS_AR, ru: BENEFITS_RU };
 function renderBenefits(){
   const b = BENEFITS_ALL[LANG][now.getDay()][isOffDay(now) ? 'off' : 'work'];
   let h = '<p class="blead">' + b.lead + '</p>';
