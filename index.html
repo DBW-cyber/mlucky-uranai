@@ -112,6 +112,8 @@
   .top5 .avg { margin-left: auto; font-size: 12px; color: #9aa3c7; }
   .method { background: #141830; border: 1px solid #2b3257; border-radius: 14px; padding: 16px; font-size: 16px; color: #cfd3e8; }
   .method p + p { margin-top: 8px; }
+  .blead { color: #f2e7c8; font-weight: 600; }
+  .bk { color: #eec96e; font-weight: 700; letter-spacing: .02em; }
   footer { margin-top: 40px; text-align: center; font-size: 12px; color: #9aa3c7; }
   footer a { color: #9aa3c7; margin: 0 10px; }
   footer .copy { margin-top: 10px; }
@@ -797,8 +799,8 @@ const BENEFITS = [
 ];
 function renderBenefits(){
   const b = BENEFITS[now.getDay()][isOffDay(now) ? 'off' : 'work'];
-  let h = '<p>' + b.lead + '</p>';
-  b.pts.forEach(p => { h += '<p>' + p + '</p>'; });
+  let h = '<p class="blead">' + b.lead + '</p>';
+  b.pts.forEach(p => { const i = p.indexOf('：'); h += (i > 0) ? '<p><span class="bk">' + p.slice(0, i) + '</span>：' + p.slice(i + 1) + '</p>' : '<p>' + p + '</p>'; });
   h += '<p>占いの結果はエンターテインメントとしてお楽しみください。大切な決断は、ご自身の判断を大切に。</p>';
   document.getElementById('benefitsBody').innerHTML = h;
 }
