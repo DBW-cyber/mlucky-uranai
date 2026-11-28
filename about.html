@@ -20,7 +20,9 @@
   a { color: #e0bc5c; }
   .back { display: inline-block; margin-top: 30px; font-size: 14px; }
 
-  .langrow { display: flex; justify-content: center; align-items: center; gap: 16px; margin: 26px auto 2px; max-width: 680px; }
+  .langrow { display: flex; justify-content: center; align-items: center; gap: 10px; margin: 26px auto 2px; max-width: 680px; flex-wrap: wrap; padding: 0 10px; }
+  .langrow button { position: relative; }
+  .langrow button::after { content: ""; position: absolute; left: 0; top: 0; width: 36px; height: 36px; border-radius: 50%; background: radial-gradient(circle at 32% 26%, rgba(255,255,255,.38), rgba(255,255,255,0) 55%); pointer-events: none; }
   .langrow button { background: none; border: none; padding: 0; cursor: pointer; border-radius: 50%; line-height: 0; }
   .langrow img { width: 36px; height: 36px; border-radius: 50%; display: block; box-shadow: 0 3px 8px rgba(0,0,0,.5); }
   .langrow button.sel img { box-shadow: 0 0 0 2px #e0bc5c, 0 3px 10px rgba(224,188,92,.45); }
@@ -49,6 +51,7 @@
 
 <div id="flagRow"></div>
 <script src="i18n.js"></script>
+<script src="i18n2.js"></script>
 <script>
 function applyPage(){
   const t = ABOUT_T[LANG];
