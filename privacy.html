@@ -16,27 +16,47 @@
   a { color: #e0bc5c; }
   .back { display: inline-block; margin-top: 30px; font-size: 14px; }
   .date { font-size: 12px; color: #9aa3c7; margin-top: 24px; }
+
+  .langrow { display: flex; justify-content: center; align-items: center; gap: 16px; margin: 26px auto 2px; max-width: 680px; }
+  .langrow button { background: none; border: none; padding: 0; cursor: pointer; border-radius: 50%; line-height: 0; }
+  .langrow img { width: 44px; height: 44px; border-radius: 50%; display: block; box-shadow: 0 3px 8px rgba(0,0,0,.5); }
+  .langrow button[data-lang="en"] img { width: 48px; height: 48px; }
+  .langrow button.sel img { box-shadow: 0 0 0 2px #e0bc5c, 0 3px 10px rgba(224,188,92,.45); }
 </style>
 </head>
 <body>
 <div class="wrap">
-  <h1>プライバシーポリシー</h1>
+  <h1 data-i18n="h1">プライバシーポリシー</h1>
 
-  <h2>個人情報の収集について</h2>
-  <p>当サイト（MLucky 強運占い）は会員登録や入力フォームを設けておらず、利用者の氏名・住所・メールアドレスなどの個人情報を収集することはありません。占いの結果は、利用者の端末（ブラウザ）の中で日付をもとに計算して表示しており、入力情報がサーバーへ送信されることもありません。</p>
+  <h2 data-i18n="h2a">個人情報の収集について</h2>
+  <p data-i18n="pa">当サイト（MLucky 強運占い）は会員登録や入力フォームを設けておらず、利用者の氏名・住所・メールアドレスなどの個人情報を収集することはありません。占いの結果は、利用者の端末（ブラウザ）の中で日付をもとに計算して表示しており、入力情報がサーバーへ送信されることもありません。</p>
 
-  <h2>アクセス解析・Cookie について</h2>
-  <p>当サイトは現在、アクセス解析ツールを導入していません。今後、サイト改善のためにアクセス解析や広告配信を導入する場合は、Cookie の利用について本ポリシーを改定し、明示します。</p>
+  <h2 data-i18n="h2b">アクセス解析・Cookie について</h2>
+  <p data-i18n="pb">当サイトは、利用状況を把握するために Google アナリティクス（GA4）を利用しています。GA4 は Cookie を通じてアクセス情報を収集しますが、個人を特定する情報は含まれません。収集された情報は Google のプライバシーポリシーに基づいて管理されます。ブラウザの設定で Cookie を無効にすると、計測を停止できます。</p>
 
-  <h2>お問い合わせ</h2>
-  <p>本ポリシーや当サイトに関するお問い合わせは、mlucky.ai.jp@gmail.com までご連絡ください。お問い合わせの際にいただいたメールアドレスは、返信の目的以外には使用しません。</p>
+  <h2 data-i18n="h2c">お問い合わせ</h2>
+  <p data-i18n="pc">本ポリシーや当サイトに関するお問い合わせは、mlucky.ai.jp@gmail.com までご連絡ください。お問い合わせの際にいただいたメールアドレスは、返信の目的以外には使用しません。</p>
 
-  <h2>ポリシーの改定</h2>
-  <p>本ポリシーの内容は、必要に応じて改定することがあります。改定した場合は、このページでお知らせします。</p>
+  <h2 data-i18n="h2d">ポリシーの改定</h2>
+  <p data-i18n="pd">本ポリシーの内容は、必要に応じて改定することがあります。改定した場合は、このページでお知らせします。</p>
 
-  <p class="date">制定日：2026年11月26日<br>運営：MLucky（エムラッキー）</p>
+  <p class="date"><span data-i18n="date">制定日：2026年11月26日／改定日：2026年11月28日</span><br><span data-i18n="op">運営：MLucky（エムラッキー）</span></p>
 
-  <a class="back" href="index.html">← トップページへ戻る</a>
+  <a class="back" href="index.html" data-i18n="back">← トップページへ戻る</a>
 </div>
+
+<div id="flagRow"></div>
+<script src="i18n.js"></script>
+<script>
+function applyPage(){
+  const t = PRIVACY_T[LANG];
+  document.title = t.title;
+  document.documentElement.lang = LANG === 'zh' ? 'zh-CN' : LANG;
+  document.querySelectorAll('[data-i18n]').forEach(el => { const k = el.getAttribute('data-i18n'); if (t[k]) el.textContent = t[k]; });
+}
+document.getElementById('flagRow').innerHTML = flagRowHTML();
+bindFlags(applyPage);
+applyPage();
+</script>
 </body>
 </html>
