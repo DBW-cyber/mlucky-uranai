@@ -19,27 +19,47 @@
   th { background: #141830; color: #9aa3c7; width: 32%; font-weight: 600; }
   a { color: #e0bc5c; }
   .back { display: inline-block; margin-top: 30px; font-size: 14px; }
+
+  .langrow { display: flex; justify-content: center; align-items: center; gap: 16px; margin: 26px auto 2px; max-width: 680px; }
+  .langrow button { background: none; border: none; padding: 0; cursor: pointer; border-radius: 50%; line-height: 0; }
+  .langrow img { width: 44px; height: 44px; border-radius: 50%; display: block; box-shadow: 0 3px 8px rgba(0,0,0,.5); }
+  .langrow button[data-lang="en"] img { width: 48px; height: 48px; }
+  .langrow button.sel img { box-shadow: 0 0 0 2px #e0bc5c, 0 3px 10px rgba(224,188,92,.45); }
 </style>
 </head>
 <body>
 <div class="wrap">
-  <h1>運営者情報</h1>
+  <h1 data-i18n="h1">運営者情報</h1>
   <table>
-    <tr><th>屋号</th><td>MLucky（エムラッキー）</td></tr>
-    <tr><th>サイト名</th><td>MLucky 強運占い</td></tr>
-    <tr><th>連絡先</th><td>mlucky.ai.jp@gmail.com</td></tr>
-    <tr><th>サイトの内容</th><td>日本にお住まいの方向けの、毎日の星座占い（12星座ランキング）を提供しています。ランキングは、その日の月・太陽・惑星の実際の位置と各星座との角度（アスペクト）をもとに計算する方式で、毎日0時に切り替わります（2026年11月28日以降。それ以前は日付と星座の組み合わせによる計算方式でした）。運勢文も、その日に最も強く影響する惑星と角度の性質、月がいる部屋（太陽ハウス）をもとに組み立てています。ラッキーカラー・アイテム・ナンバーも、その日に最も強く影響する惑星の伝統的な対応（色・物・数）から決めています。天体位置の計算には Astronomy Engine（MITライセンス）を使用しています。</td></tr>
+    <tr><th data-i18n="thName">屋号</th><td data-i18n="tdName">MLucky（エムラッキー）</td></tr>
+    <tr><th data-i18n="thSite">サイト名</th><td data-i18n="tdSite">MLucky 強運占い</td></tr>
+    <tr><th data-i18n="thContact">連絡先</th><td>mlucky.ai.jp@gmail.com</td></tr>
+    <tr><th data-i18n="thContent">サイトの内容</th><td data-i18n="tdContent">日本にお住まいの方向けの、毎日の星座占い（12星座ランキング）を提供しています。ランキングは、その日の月・太陽・惑星の実際の位置と各星座との角度（アスペクト）をもとに計算する方式で、毎日0時に切り替わります（2026年11月28日以降。それ以前は日付と星座の組み合わせによる計算方式でした）。運勢文も、その日に最も強く影響する惑星と角度の性質、月がいる部屋（太陽ハウス）をもとに組み立てています。ラッキーカラー・アイテム・ナンバーも、その日に最も強く影響する惑星の伝統的な対応（色・物・数）から決めています。天体位置の計算には Astronomy Engine（MITライセンス）を使用しています。</td></tr>
   </table>
 
-  <h2>広告表記について</h2>
-  <p>当サイトは現在、広告を掲載していません。</p>
-  <p>今後、広告やアフィリエイトプログラム（商品・サービスの紹介による収益が発生する仕組み）を導入する場合は、該当する箇所に「広告」「PR」であることを明示します（ステルスマーケティング規制への対応）。</p>
-  <p>また、占いのランキングや順位は、広告収入の有無や金額によって変わることは一切ありません。</p>
+  <h2 data-i18n="h2Ads">広告表記について</h2>
+  <p data-i18n="ads1">当サイトは現在、広告を掲載していません。</p>
+  <p data-i18n="ads2">今後、広告やアフィリエイトプログラム（商品・サービスの紹介による収益が発生する仕組み）を導入する場合は、該当する箇所に「広告」「PR」であることを明示します（ステルスマーケティング規制への対応）。</p>
+  <p data-i18n="ads3">また、占いのランキングや順位は、広告収入の有無や金額によって変わることは一切ありません。</p>
 
-  <h2>免責事項</h2>
-  <p>占いの結果はエンターテインメントとして提供するものであり、将来の出来事を保証するものではありません。掲載情報の利用によって生じた損害について、運営者は責任を負いかねます。</p>
+  <h2 data-i18n="h2Disc">免責事項</h2>
+  <p data-i18n="disc">占いの結果はエンターテインメントとして提供するものであり、将来の出来事を保証するものではありません。掲載情報の利用によって生じた損害について、運営者は責任を負いかねます。</p>
 
-  <a class="back" href="index.html">← トップページへ戻る</a>
+  <a class="back" href="index.html" data-i18n="back">← トップページへ戻る</a>
 </div>
+
+<div id="flagRow"></div>
+<script src="i18n.js"></script>
+<script>
+function applyPage(){
+  const t = ABOUT_T[LANG];
+  document.title = t.title;
+  document.documentElement.lang = LANG === 'zh' ? 'zh-CN' : LANG;
+  document.querySelectorAll('[data-i18n]').forEach(el => { const k = el.getAttribute('data-i18n'); if (t[k]) el.textContent = t[k]; });
+}
+document.getElementById('flagRow').innerHTML = flagRowHTML();
+bindFlags(applyPage);
+applyPage();
+</script>
 </body>
 </html>
